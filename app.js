@@ -17,6 +17,7 @@ function confirmAddToCart() {
   cart.push({
     ...selectedProduct,
     qty: 1,
+    orderType: selectedOrderType, // ✅ ADD THIS FIX
     addons: selected,
   });
 
