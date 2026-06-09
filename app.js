@@ -226,15 +226,18 @@ function renderCart() {
               $${item.price.toFixed(2)} x ${item.qty}
             </div>
 
-            ${
-              item.addons?.length
-                ? `
-                  <div class="text-[11px] text-gray-400 mt-1">
-                    + ${item.addons.map((a) => a.name).join(", ")}
-                  </div>
-                `
-                : ""
-            }
+           ${
+             item.addons?.length
+               ? `
+      <div class="text-[11px] text-gray-400 mt-1">
+        + ${item.addons.map((a) => a.name).join(", ")}
+        <span class="text-rose-500 font-semibold">
+          (+$${item.addons.reduce((sum, a) => sum + a.price, 0).toFixed(2)})
+        </span>
+      </div>
+    `
+               : ""
+           }
 
           </div>
 
@@ -257,7 +260,13 @@ function renderCart() {
     })
     .join("");
 
-  const sub = cart.reduce((a, b) => a + b.price * b.qty, 0);
+  const sub = cart.reduce((total, item) => {
+    const addonTotal = item.addons
+      ? item.addons.reduce((sum, a) => sum + a.price, 0)
+      : 0;
+
+    return total + (item.price + addonTotal) * item.qty;
+  }, 0);
   document.getElementById("total").innerText = `$${sub.toFixed(2)}`;
 
   lucide.createIcons();
