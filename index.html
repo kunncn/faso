@@ -130,6 +130,18 @@
                   <option value="takeaway">Take Away</option>
                 </select>
               </div>
+              <div class="space-y-2">
+                <label class="text-xs text-gray-500">Discount</label>
+
+                <select
+                  id="discount"
+                  onchange="renderCart()"
+                  class="w-full p-2 border rounded-lg"
+                >
+                  <option value="0">No Discount</option>
+                  <option value="0.2">20% OFF</option>
+                </select>
+              </div>
               <span>Total</span>
               <span id="total">$0.00</span>
             </div>

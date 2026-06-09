@@ -260,6 +260,8 @@ function renderCart() {
     })
     .join("");
 
+  const discount = parseFloat(document.getElementById("discount")?.value || 0);
+
   const sub = cart.reduce((total, item) => {
     const addonTotal = item.addons
       ? item.addons.reduce((sum, a) => sum + a.price, 0)
@@ -267,7 +269,10 @@ function renderCart() {
 
     return total + (item.price + addonTotal) * item.qty;
   }, 0);
-  document.getElementById("total").innerText = `$${sub.toFixed(2)}`;
+
+  const finalTotal = sub - sub * discount;
+
+  document.getElementById("total").innerText = `$${finalTotal.toFixed(2)}`;
 
   lucide.createIcons();
 }
