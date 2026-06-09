@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FASO - Pastry POS System</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+      /* smooth mobile cart animation */
+      #cart-panel {
+        transition: transform 0.3s ease;
+      }
+    </style>
+  </head>
+
+  <body class="h-screen flex flex-col overflow-hidden">
+    <!-- NAV -->
+    <nav
+      class="bg-rose-500 text-white p-3 md:p-4 flex flex-col md:flex-row gap-2 justify-between items-center shadow-lg"
+    >
+      <div class="flex items-center gap-2">
+        <i data-lucide="croissant" class="w-7 h-7 md:w-8 md:h-8"></i>
+        <h1 class="text-lg md:text-2xl font-bold tracking-tighter">
+          FASO <span class="font-light text-xs md:text-sm">PASTRY POS</span>
+        </h1>
+      </div>
+
+      <div class="flex gap-2 items-center">
+        <button
+          onclick="exportPDF()"
+          class="bg-black text-white px-3 py-1 md:px-4 md:py-2 rounded-lg text-sm md:text-base"
+        >
+          Export Bills
+        </button>
+        <button
+          onclick="showOrderHistory()"
+          class="bg-white text-rose-500 px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
+        >
+          History
+        </button>
+
+        <!-- MOBILE CART BUTTON -->
+        <button
+          onclick="toggleCart()"
+          class="md:hidden bg-white text-rose-500 px-3 py-1 rounded-lg font-bold"
+        >
+          Cart
+        </button>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+      <!-- POS -->
+      <section
+        id="pos-tab"
+        class="flex-1 flex flex-col md:flex-row w-full overflow-hidden"
+      >
+        <!-- PRODUCTS -->
+        <div class="flex-1 p-3 md:p-6 overflow-y-auto">
+          <div
+            class="flex flex-col md:flex-row gap-3 md:justify-between md:items-center mb-4"
+          >
+            <h2 class="text-lg md:text-xl font-semibold text-gray-800">
+              Fresh Menu
+            </h2>
+
+            <input
+              id="searchInput"
+              type="text"
+              placeholder="Search pastries..."
+              class="border rounded-full px-3 py-2 w-full md:w-64"
+            />
+          </div>
+          <div
+            id="product-grid"
+            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3"
+          ></div>
+        </div>
+
+        <!-- CART (FIXED MOBILE + DESKTOP) -->
+        <div
+          id="cart-panel"
+          class="fixed md:static inset-x-0 bottom-0 md:w-96 bg-white border-t md:border-l shadow-lg md:shadow-none flex flex-col transform translate-y-full md:translate-y-0 z-50 max-h-[85vh] md:max-h-none rounded-t-2xl md:rounded-none"
+        >
+          <div
+            class="p-3 border-b bg-gray-50 flex items-center justify-between"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <i
+                data-lucide="shopping-cart"
+                class="w-5 h-5 text-rose-500 shrink-0"
+              ></i>
+
+              <h2 class="text-base md:text-lg font-bold truncate">
+                Current Order
+              </h2>
+            </div>
+
+            <button
+              onclick="toggleCart()"
+              class="md:hidden text-xs bg-black text-white px-2 py-1 rounded-lg shrink-0"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div
+            id="cart-items"
+            class="flex-1 overflow-y-auto p-3 space-y-3 min-h-0"
+          ></div>
+
+          <div class="p-4 border-t bg-gray-50 space-y-3">
+            <div class="flex justify-between text-lg font-bold text-rose-600">
+              <div class="space-y-2">
+                <label class="text-xs text-gray-500">Order Type</label>
+
+                <select
+                  id="orderType"
+                  onchange="setOrderType(this.value)"
+                  class="w-full p-2 border rounded-lg"
+                >
+                  <option value="dinein">Dine In</option>
+                  <option value="takeaway">Take Away</option>
+                </select>
+              </div>
+              <span>Total</span>
+              <span id="total">$0.00</span>
+            </div>
+
+            <select id="paymentMethod" class="w-full p-2 border rounded-lg">
+              <option value="cash">Cash</option>
+              <option value="card">Credit Card</option>
+              <option value="qr">QR Pay</option>
+            </select>
+
+            <button
+              onclick="processSale()"
+              class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold"
+            >
+              COMPLETE SALE
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- SUCCESS MODAL -->
+    <div
+      id="modal"
+      class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+    >
+      <div class="bg-white p-6 rounded-2xl text-center w-full max-w-sm">
+        <h2 class="text-xl font-bold">Sale Successful!</h2>
+        <p class="text-gray-500 mt-2">Receipt generated</p>
+
+        <button
+          onclick="closeModal()"
+          class="mt-5 bg-gray-800 text-white px-6 py-2 rounded-lg"
+        >
+          Done
+        </button>
+      </div>
+    </div>
+
+    <!-- ORDER HISTORY -->
+    <div
+      id="history-modal"
+      class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+    >
+      <div class="bg-white w-full max-w-3xl rounded-2xl overflow-hidden">
+        <div class="flex justify-between items-center p-4 border-b">
+          <h2 class="font-bold text-lg">Today's Orders</h2>
+
+          <button
+            onclick="closeHistory()"
+            class="bg-black text-white px-3 py-1 rounded-lg"
+          >
+            Close
+          </button>
+        </div>
+
+        <div
+          id="history-list"
+          class="max-h-[70vh] overflow-y-auto p-4 space-y-3"
+        ></div>
+      </div>
+    </div>
+    <!-- DRINK ADD-ON MODAL -->
+    <div
+      id="addon-modal"
+      class="hidden fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-50"
+    >
+      <div class="bg-white w-full md:max-w-md rounded-t-2xl md:rounded-2xl p-4">
+        <!-- Title -->
+        <div class="flex justify-between items-center mb-3">
+          <h2 id="addon-title" class="font-bold text-lg">Customize Drink</h2>
+          <button onclick="closeAddonModal()" class="text-gray-500">✕</button>
+        </div>
+
+        <!-- Addons list -->
+        <div id="addon-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
+
+        <!-- Add button -->
+        <button
+          onclick="confirmAddToCart()"
+          class="w-full mt-4 bg-rose-500 text-white py-3 rounded-xl font-bold"
+        >
+          Add to Cart
+        </button>
+      </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+      function toggleCart() {
+        const cart = document.getElementById("cart-panel");
+
+        if (cart.classList.contains("translate-y-full")) {
+          cart.classList.remove("translate-y-full");
+        } else {
+          cart.classList.add("translate-y-full");
+        }
+      }
+    </script>
+
+    <script src="app.js"></script>
+
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
