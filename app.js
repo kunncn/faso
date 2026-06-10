@@ -157,31 +157,7 @@ function renderProducts(list = inventory) {
     )
     .join("");
 }
-// function renderProducts(list = inventory) {
-//   const grid = document.getElementById("product-grid");
 
-//   grid.innerHTML = list
-//     .map(
-//       (item) => `
-//     <div onclick="addToCart(${item.id})"
-//       class="pastry-card ${item.color} bg-white p-5 rounded-2xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all">
-
-//       <div class="w-full h-32 bg-gray-50 rounded-xl mb-4 flex items-center justify-center text-4xl">
-//         🥐
-//       </div>
-
-//       <h3 class="font-bold text-gray-800">${item.name}</h3>
-//       <p class="text-rose-500 font-bold mt-1">$${item.price.toFixed(2)}</p>
-
-//     </div>
-//   `,
-//     )
-//     .join("");
-// }
-
-// =====================
-// CART
-// =====================
 function addToCart(id) {
   const item = inventory.find((i) => i.id === id);
 
@@ -190,12 +166,23 @@ function addToCart(id) {
     return;
   }
 
-  cart.push({
-    ...item,
-    qty: 1,
-    orderType: selectedOrderType, // ✅ ALWAYS SAVE HERE
-    addons: [],
-  });
+  const existing = cart.find(
+    (c) =>
+      c.id === item.id &&
+      c.orderType === selectedOrderType &&
+      (!c.addons || c.addons.length === 0),
+  );
+
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({
+      ...item,
+      qty: 1,
+      orderType: selectedOrderType,
+      addons: [],
+    });
+  }
 
   renderCart();
 }
@@ -245,9 +232,12 @@ function renderCart() {
           <!-- RIGHT SIDE -->
           <div class="flex items-center gap-3 shrink-0">
 
-            <span class="font-bold">
-              $${(item.price * item.qty).toFixed(2)}
-            </span>
+          <span class="font-bold">
+  $${(
+    (item.price + (item.addons?.reduce((s, a) => s + a.price, 0) || 0)) *
+    item.qty
+  ).toFixed(2)}
+</span>
 
             <button onclick="removeFromCart(${idx})"
               class="text-gray-400 hover:text-red-500">
