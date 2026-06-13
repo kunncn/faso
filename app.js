@@ -19,6 +19,13 @@ const categoryEmoji = {
   chocolate: "🍫",
 };
 
+function showCategoryScreen() {
+  document.getElementById("product-grid").innerHTML =
+    `<div class="text-gray-400 text-center col-span-full">
+      Select a category to start
+    </div>`;
+}
+
 function filterDrink(category) {
   renderProducts(inventory.filter((item) => item.category === category));
 }
@@ -139,7 +146,7 @@ function loadInventory() {
     .then((data) => {
       inventory = data;
 
-      renderProducts();
+      showCategoryScreen(); // 👈 instead of renderProducts()
       lucide.createIcons();
     })
     .catch((err) => {
