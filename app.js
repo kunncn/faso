@@ -8,6 +8,30 @@ let selectedOrderType = "dinein";
 
 let inventory = [];
 let cart = [];
+const priceCategories = [10, 14, 15, 16, 18, 20, 30];
+const categoryEmoji = {
+  pastry: "🥐",
+  savory: "🥪",
+  coffee: "☕",
+  tea: "🍵",
+  soda: "🥤",
+  matcha: "🍵",
+  chocolate: "🍫",
+};
+
+function filterDrink(category) {
+  renderProducts(inventory.filter((item) => item.category === category));
+}
+
+function filterByPrice(price) {
+  const filtered = inventory.filter((item) => item.price === price);
+  renderProducts(filtered);
+}
+
+function filterByDrink(type) {
+  const filtered = inventory.filter((item) => item.drinkType === type);
+  renderProducts(filtered);
+}
 
 function confirmAddToCart() {
   const selected = [
@@ -146,8 +170,10 @@ function renderProducts(list = inventory) {
       class="pastry-card ${item.color} bg-white p-5 rounded-2xl shadow-sm border cursor-pointer hover:shadow-md">
 
       <div class="w-full h-32 bg-gray-50 rounded-xl mb-4 flex items-center justify-center text-4xl">
-        🥐
-      </div>
+  ${categoryEmoji[item.category] || "🍽️"}
+</div>
+
+    
 
       <h3 class="font-bold text-gray-800">${item.name}</h3>
       <p class="text-rose-500 font-bold mt-1">$${item.price.toFixed(2)}</p>
