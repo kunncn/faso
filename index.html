@@ -82,90 +82,96 @@
             />
           </div>
           <!-- PRICE CATEGORIES -->
-          <div id="price-categories" class="grid grid-cols-4 gap-3 mb-4">
+          <div
+            id="price-categories"
+            class="grid grid-cols-4 md:grid-cols-7 gap-3 mb-4"
+          >
             <button
               onclick="filterByPrice(10)"
-              class="bg-yellow-100 p-4 rounded-xl font-bold"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM10
             </button>
 
             <button
               onclick="filterByPrice(14)"
-              class="bg-yellow-100 p-4 rounded-xl font-bold"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM14
             </button>
 
             <button
               onclick="filterByPrice(15)"
-              class="bg-yellow-100 p-4 rounded-xl font-bold"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM15
             </button>
 
             <button
               onclick="filterByPrice(16)"
-              class="bg-yellow-100 p-4 rounded-xl font-bold"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM16
             </button>
 
             <button
               onclick="filterByPrice(18)"
-              class="bg-yellow-100 p-4 rounded-xl font-bold"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM18
             </button>
 
             <button
               onclick="filterByPrice(20)"
-              class="bg-yellow-100 p-4 rounded-xl font-bold"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM20
             </button>
 
             <button
               onclick="filterByPrice(30)"
-              class="bg-yellow-100 p-4 rounded-xl font-bold"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM30
             </button>
           </div>
 
           <!-- DRINK CATEGORIES -->
-          <div id="drink-categories" class="grid grid-cols-5 gap-3 mb-4">
+          <div
+            id="drink-categories"
+            class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 mb-4"
+          >
             <button
               onclick="filterDrink('coffee')"
-              class="bg-blue-100 p-4 rounded-xl font-bold"
+              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               Coffee
             </button>
 
             <button
               onclick="filterDrink('tea')"
-              class="bg-blue-100 p-4 rounded-xl font-bold"
+              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               Tea
             </button>
 
             <button
               onclick="filterDrink('soda')"
-              class="bg-blue-100 p-4 rounded-xl font-bold"
+              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               Soda
             </button>
 
             <button
               onclick="filterDrink('matcha')"
-              class="bg-blue-100 p-4 rounded-xl font-bold"
+              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               Matcha
             </button>
 
             <button
               onclick="filterDrink('chocolate')"
-              class="bg-blue-100 p-4 rounded-xl font-bold"
+              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               Chocolate
             </button>
@@ -232,6 +238,7 @@
                 >
                   <option value="0">No Discount</option>
                   <option value="0.2">20% OFF</option>
+                  <option value="0.1">10% OFF</option>
                 </select>
               </div>
               <span>Total</span>

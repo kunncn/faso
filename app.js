@@ -183,7 +183,7 @@ function renderProducts(list = inventory) {
     
 
       <h3 class="font-bold text-gray-800">${item.name}</h3>
-      <p class="text-rose-500 font-bold mt-1">$${item.price.toFixed(2)}</p>
+      <p class="text-rose-500 font-bold mt-1">RM${item.price.toFixed(2)}</p>
 
     </div>
   `,
