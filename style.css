@@ -8,3 +8,7 @@ body {
 .pastry-card:active {
     transform: scale(0.95);
 }
+
+.checkout-area {
+    padding-bottom: max(70px, env(safe-area-inset-bottom));
+}
