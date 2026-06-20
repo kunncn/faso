@@ -2,42 +2,42 @@
   {
     "id": 1,
     "name": "Wholemeal Sourdough Loaf",
-    "price": 12.0,
+    "price": 20.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 2,
     "name": "Jalapeno Sundried Tomato Cheddar",
-    "price": 14.0,
+    "price": 30.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 3,
     "name": "Cranberry Walnut",
-    "price": 13.0,
+    "price": 30.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 4,
     "name": "Blueberry Cream Cheese",
-    "price": 15.0,
+    "price": 30.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 5,
-    "name": "Pistachio Sourdough",
-    "price": 16.0,
+    "name": "Pistachio Sourdough Fig",
+    "price": 30.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 6,
     "name": "Hazelnut Choc Sourdough Brioche",
-    "price": 14.0,
+    "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
@@ -51,21 +51,21 @@
   {
     "id": 8,
     "name": "Fererro Sourdough",
-    "price": 15.0,
+    "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 9,
     "name": "Chocolate Ganache",
-    "price": 11.0,
+    "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 10,
     "name": "Strawberry Ribbon",
-    "price": 11.0,
+    "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
@@ -73,20 +73,20 @@
   {
     "id": 11,
     "name": "Cheesecake Sourdough",
-    "price": 15.0,
+    "price": 18.0,
     "soldOut": false
   },
   {
     "id": 12,
     "name": "Pistachio Vanilla",
-    "price": 12.0,
+    "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 13,
     "name": "Coffee Hazelnut",
-    "price": 12.0,
+    "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
@@ -100,7 +100,7 @@
   {
     "id": 15,
     "name": "Double Choc Pain AU",
-    "price": 8.0,
+    "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
@@ -114,28 +114,28 @@
   {
     "id": 17,
     "name": "Pistachio Tiramisu",
-    "price": 13.0,
+    "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 18,
     "name": "Chicken Sausage",
-    "price": 10.0,
+    "price": 16.0,
     "soldOut": false,
     "category": "savory"
   },
   {
     "id": 19,
     "name": "Turkey Cheese",
-    "price": 10.0,
+    "price": 18.0,
     "soldOut": false,
     "category": "savory"
   },
   {
     "id": 20,
     "name": "Chocolate Pain AU",
-    "price": 8.0,
+    "price": 16.0,
     "soldOut": false,
     "category": "savory"
   },
@@ -150,14 +150,14 @@
   {
     "id": 22,
     "name": "Chicken Carbonara Sourdough Croissant",
-    "price": 12.0,
+    "price": 16.0,
     "soldOut": false,
     "category": "savory"
   },
   {
     "id": 23,
     "name": "Mushroom Cream Sourdough Croissant",
-    "price": 11.0,
+    "price": 16.0,
     "soldOut": false,
     "category": "savory"
   },
@@ -185,14 +185,14 @@
   {
     "id": 27,
     "name": "Spinach Chicken Cheese Quiche",
-    "price": 12.0,
+    "price": 18.0,
     "soldOut": false,
     "category": "savory"
   },
   {
     "id": 28,
     "name": "Mushroom Cheese Quiche",
-    "price": 11.0,
+    "price": 16.0,
     "soldOut": false,
     "category": "savory"
   },
@@ -270,7 +270,7 @@
   {
     "id": 39,
     "name": "Plain Cannele",
-    "price": 6.0,
+    "price": 10.0,
     "soldOut": false,
     "category": "pastry"
   },
@@ -278,7 +278,7 @@
   {
     "id": 40,
     "name": "Cempedak Sourdough Croissant",
-    "price": 10.0,
+    "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
@@ -299,7 +299,7 @@
   {
     "id": 43,
     "name": "Vanilla Egg Puff Tart",
-    "price": 8.0,
+    "price": 12.0,
     "soldOut": false,
     "category": "pastry"
   },
@@ -496,5 +496,19 @@
     "price": 17.0,
     "soldOut": false,
     "category": "coffee"
+  },
+  {
+    "id": 126,
+    "name": "Resberry Vanilla Sourdough Brioche",
+    "price": 18,
+    "soldOut": false,
+    "category": "pastry"
+  },
+  {
+    "id": 127,
+    "name": "Tiramisu Ribbon",
+    "price": 18,
+    "soldOut": false,
+    "category": "pastry"
   }
 ]
