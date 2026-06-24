@@ -2,6 +2,5 @@
   { "id": 201, "name": "Brown Butter", "price": 2.0 },
   { "id": 202, "name": "Chocolate Cookies", "price": 2.0 },
   { "id": 203, "name": "Wild Mint", "price": 2.0 },
-  { "id": 204, "name": "Oat Milk", "price": 3.0 },
-  { "id": 205, "name": "Ice Cube", "price": 1.0 }
+  { "id": 204, "name": "Oat Milk", "price": 3.0 }
 ]
