@@ -37,14 +37,14 @@
   {
     "id": 6,
     "name": "Hazelnut Choc Sourdough Brioche",
-    "price": 18.0,
+    "price": 16.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 7,
     "name": "Raspberry Vanilla Sourdough Brioche",
-    "price": 14.0,
+    "price": 16.0,
     "soldOut": false,
     "category": "pastry"
   },
@@ -57,35 +57,35 @@
   },
   {
     "id": 9,
-    "name": "Chocolate Ganache",
+    "name": "Chocolate Ganache Sourdough Croissant",
     "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 10,
-    "name": "Strawberry Ribbon",
+    "name": "Strawberry Ribbon Sourdough Croissant",
     "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
-
   {
     "id": 11,
-    "name": "Cheesecake Sourdough",
+    "name": "Cheesecake Sourdough Croissant",
     "price": 18.0,
-    "soldOut": false
+    "soldOut": false,
+    "category": "pastry"
   },
   {
     "id": 12,
-    "name": "Pistachio Vanilla",
+    "name": "Pistachio Vanilla Sourdough Croissant",
     "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 13,
-    "name": "Coffee Hazelnut",
+    "name": "Coffee Hazelnut Pain Suisse",
     "price": 18.0,
     "soldOut": false,
     "category": "pastry"
@@ -99,21 +99,21 @@
   },
   {
     "id": 15,
-    "name": "Double Choc Pain AU",
+    "name": "Double Choc Pain Au Suisse",
     "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 16,
-    "name": "Blueberry Vanilla",
-    "price": 11.0,
+    "name": "Blueberry Vanilla Sourdough Croissant",
+    "price": 18.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 17,
-    "name": "Pistachio Tiramisu",
+    "name": "Pistachio Tiramisu Sourdough Croissant",
     "price": 18.0,
     "soldOut": false,
     "category": "pastry"
@@ -127,19 +127,18 @@
   },
   {
     "id": 19,
-    "name": "Turkey Cheese",
+    "name": "Turkey Cheese Sourdough Croissant",
     "price": 18.0,
     "soldOut": false,
     "category": "savory"
   },
   {
     "id": 20,
-    "name": "Chocolate Pain AU",
-    "price": 16.0,
+    "name": "Chocolate Pain Au Suisse",
+    "price": 14.0,
     "soldOut": false,
-    "category": "savory"
+    "category": "pastry"
   },
-
   {
     "id": 21,
     "name": "Plain Croissant",
@@ -164,21 +163,21 @@
   {
     "id": 24,
     "name": "Chicken Mushroom Sourdough Baguette",
-    "price": 13.0,
+    "price": 15.0,
     "soldOut": false,
     "category": "savory"
   },
   {
     "id": 25,
     "name": "Tomato Cheese Sourdough Baguette",
-    "price": 11.0,
+    "price": 14.0,
     "soldOut": false,
     "category": "savory"
   },
   {
     "id": 26,
     "name": "Mushroom Cheese Sourdough Baguette",
-    "price": 11.0,
+    "price": 14.0,
     "soldOut": false,
     "category": "savory"
   },
@@ -203,7 +202,6 @@
     "soldOut": false,
     "category": "savory"
   },
-
   {
     "id": 30,
     "name": "Tart Hojicha",
@@ -274,7 +272,6 @@
     "soldOut": false,
     "category": "pastry"
   },
-
   {
     "id": 40,
     "name": "Cempedak Sourdough Croissant",
@@ -285,14 +282,14 @@
   {
     "id": 41,
     "name": "Matcha Egg Puff Tart",
-    "price": 8.0,
+    "price": 12.0,
     "soldOut": false,
     "category": "pastry"
   },
   {
     "id": 42,
     "name": "Hojicha Egg Puff Tart",
-    "price": 8.0,
+    "price": 14.0,
     "soldOut": false,
     "category": "pastry"
   },
@@ -318,9 +315,31 @@
     "category": "pastry"
   },
   {
+    "id": 46,
+    "name": "Peach Almond Sourdough Brioche",
+    "price": 16.0,
+    "soldOut": false,
+    "category": "pastry"
+  },
+  {
+    "id": 47,
+    "name": "Tiramisu Ribbon Sourdough Croissant",
+    "price": 18.0,
+    "soldOut": false,
+    "category": "pastry"
+  },
+  {
+    "id": 48,
+    "name": "Sourdough Croissant",
+    "price": 10.0,
+    "soldOut": false,
+    "category": "savory"
+  },
+  {
     "id": 101,
     "name": "Espresso",
     "price": 10.0,
+    "priceIce": 0.0,
     "soldOut": false,
     "category": "coffee"
   },
@@ -328,6 +347,7 @@
     "id": 102,
     "name": "Americano",
     "price": 12.0,
+    "priceIce": 13.0,
     "soldOut": false,
     "category": "coffee"
   },
@@ -335,6 +355,7 @@
     "id": 103,
     "name": "Cafe Latte",
     "price": 14.0,
+    "priceIce": 15.0,
     "soldOut": false,
     "category": "coffee"
   },
@@ -342,6 +363,7 @@
     "id": 104,
     "name": "Cappuccino",
     "price": 15.0,
+    "priceIce": 16.0,
     "soldOut": false,
     "category": "coffee"
   },
@@ -349,6 +371,7 @@
     "id": 105,
     "name": "Mocha",
     "price": 16.0,
+    "priceIce": 17.0,
     "soldOut": false,
     "category": "coffee"
   },
@@ -356,6 +379,7 @@
     "id": 106,
     "name": "Flat White",
     "price": 14.0,
+    "priceIce": 15.0,
     "soldOut": false,
     "category": "coffee"
   },
@@ -363,152 +387,219 @@
     "id": 107,
     "name": "Macchiato",
     "price": 12.0,
+    "priceIce": 0.0,
     "soldOut": false,
     "category": "coffee"
   },
-
   {
     "id": 108,
     "name": "Matcha Classic",
     "price": 15.0,
+    "priceIce": 16.0,
     "soldOut": false,
     "category": "matcha"
   },
   {
     "id": 109,
     "name": "Matcha Dirty",
-    "price": 17.0,
+    "price": 0.0,
+    "priceIce": 17.0,
     "soldOut": false,
     "category": "matcha"
   },
   {
     "id": 110,
     "name": "Matcha Strawberry",
-    "price": 17.0,
+    "price": 0.0,
+    "priceIce": 17.0,
     "soldOut": false,
     "category": "matcha"
   },
   {
     "id": 111,
     "name": "Matcha Yuzu Mango",
-    "price": 17.0,
+    "price": 0.0,
+    "priceIce": 17.0,
     "soldOut": false,
     "category": "matcha"
   },
   {
     "id": 112,
     "name": "Matcha Pineapple",
-    "price": 17.0,
+    "price": 0.0,
+    "priceIce": 17.0,
     "soldOut": false,
     "category": "matcha"
   },
   {
     "id": 113,
     "name": "Matcha Chocolate",
-    "price": 18.0,
+    "price": 0.0,
+    "priceIce": 18.0,
     "soldOut": false,
     "category": "matcha"
   },
-
   {
     "id": 114,
-    "name": "Chocolate",
+    "name": "Chocolate Classic",
     "price": 16.0,
+    "priceIce": 17.0,
     "soldOut": false,
     "category": "chocolate"
   },
   {
     "id": 115,
-    "name": "Strawberry Chocolate",
+    "name": "Chocolate Mint",
     "price": 17.0,
+    "priceIce": 18.0,
     "soldOut": false,
     "category": "chocolate"
   },
-
   {
     "id": 116,
-    "name": "Chamomile Tea",
-    "price": 12.0,
+    "name": "Chocolate Strawberry",
+    "price": 0.0,
+    "priceIce": 18.0,
     "soldOut": false,
-    "category": "tea"
+    "category": "chocolate"
   },
   {
     "id": 117,
-    "name": "Earl Grey Tea",
-    "price": 12.0,
+    "name": "Chocolate Mango",
+    "price": 0.0,
+    "priceIce": 18.0,
     "soldOut": false,
-    "category": "tea"
+    "category": "chocolate"
   },
   {
     "id": 118,
-    "name": "Honey Lemon Tea",
+    "name": "Chamomile Tea",
     "price": 12.0,
+    "priceIce": 13.0,
     "soldOut": false,
     "category": "tea"
   },
   {
     "id": 119,
-    "name": "Strawberry Apple Tea",
+    "name": "Earl Grey Tea",
     "price": 12.0,
+    "priceIce": 13.0,
     "soldOut": false,
     "category": "tea"
   },
-
   {
     "id": 120,
-    "name": "Mango Yuzu Soda",
-    "price": 16.0,
+    "name": "Honey Lemon Tea",
+    "price": 12.0,
+    "priceIce": 13.0,
     "soldOut": false,
-    "category": "soda"
+    "category": "tea"
   },
   {
     "id": 121,
-    "name": "Sweet Sour Mint Soda",
-    "price": 16.0,
+    "name": "Strawberry Apple Tea",
+    "price": 12.0,
+    "priceIce": 13.0,
     "soldOut": false,
-    "category": "soda"
+    "category": "tea"
   },
   {
     "id": 122,
-    "name": "Paradise Berry Soda",
-    "price": 16.0,
+    "name": "English Breakfast Tea",
+    "price": 12.0,
+    "priceIce": 13.0,
     "soldOut": false,
-    "category": "soda"
+    "category": "tea"
   },
-
   {
     "id": 123,
-    "name": "Snicker Latte",
-    "price": 18.0,
+    "name": "Berry Tea",
+    "price": 12.0,
+    "priceIce": 13.0,
     "soldOut": false,
-    "category": "coffee"
+    "category": "tea"
   },
   {
     "id": 124,
-    "name": "Emerald Mint Sky",
-    "price": 17.0,
+    "name": "Mango Yuzu Soda",
+    "price": 0.0,
+    "priceIce": 16.0,
     "soldOut": false,
     "category": "soda"
   },
   {
     "id": 125,
-    "name": "Mint Chocolate Chip",
-    "price": 17.0,
+    "name": "Sweet Sour Mint Soda",
+    "price": 0.0,
+    "priceIce": 16.0,
+    "soldOut": false,
+    "category": "soda"
+  },
+  {
+    "id": 126,
+    "name": "Paradise Berry Soda",
+    "price": 0.0,
+    "priceIce": 16.0,
+    "soldOut": false,
+    "category": "soda"
+  },
+  {
+    "id": 127,
+    "name": "Snicker Latte",
+    "price": 0.0,
+    "priceIce": 18.0,
     "soldOut": false,
     "category": "coffee"
   },
   {
-    "id": 126,
-    "name": "Resberry Vanilla Sourdough Brioche",
-    "price": 18,
+    "id": 128,
+    "name": "Emerald Mint Sky",
+    "price": 0.0,
+    "priceIce": 17.0,
     "soldOut": false,
-    "category": "pastry"
+    "category": "soda"
   },
   {
-    "id": 127,
-    "name": "Tiramisu Ribbon",
-    "price": 18,
+    "id": 129,
+    "name": "Mint Chocolate Chip",
+    "price": 0.0,
+    "priceIce": 17.0,
     "soldOut": false,
-    "category": "pastry"
+    "category": "coffee"
+  },
+  {
+    "id": 130,
+    "name": "Espresso Shot",
+    "price": 5.0,
+    "soldOut": false,
+    "category": "addon"
+  },
+  {
+    "id": 131,
+    "name": "Wild Mint Syrup",
+    "price": 2.0,
+    "soldOut": false,
+    "category": "addon"
+  },
+  {
+    "id": 132,
+    "name": "Chocolate Cookies Syrup",
+    "price": 2.0,
+    "soldOut": false,
+    "category": "addon"
+  },
+  {
+    "id": 133,
+    "name": "Brown Butter Syrup",
+    "price": 3.0,
+    "soldOut": false,
+    "category": "addon"
+  },
+  {
+    "id": 134,
+    "name": "Oat Milk",
+    "price": 0.0,
+    "soldOut": false,
+    "category": "addon"
   }
 ]
