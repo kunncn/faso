@@ -7,13 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <link rel="stylesheet" href="style.css" />
     <link
       rel="icon"
       type="image/png"
-      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMwAAADACAMAAAB/Pny7AAAAzFBMVEUAhpf///8AfpCDu8QAg5QAgZPX5erb6O3T4+gAco..."
+      href="data:image/png;base64,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"
     />
     <style>
+      /* smooth mobile cart animation */
       #cart-panel {
         transition: transform 0.3s ease;
       }
@@ -31,7 +33,8 @@
           FASO <span class="font-light text-xs md:text-sm">PASTRY POS</span>
         </h1>
       </div>
-      <div class="flex gap-2 items-center flex-wrap justify-center">
+
+      <div class="flex gap-2 items-center">
         <button
           onclick="exportPDF()"
           class="bg-black text-white px-3 py-1 md:px-4 md:py-2 rounded-lg text-sm md:text-base"
@@ -44,12 +47,7 @@
         >
           History
         </button>
-        <button
-          onclick="openInventoryManager()"
-          class="bg-yellow-400 text-black px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
-        >
-          Inventory
-        </button>
+
         <!-- MOBILE CART BUTTON -->
         <button
           onclick="toggleCart()"
@@ -62,6 +60,7 @@
 
     <!-- MAIN -->
     <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+      <!-- POS -->
       <section
         id="pos-tab"
         class="flex-1 flex flex-col md:flex-row w-full overflow-hidden"
@@ -74,6 +73,7 @@
             <h2 class="text-lg md:text-xl font-semibold text-gray-800">
               Fresh Menu
             </h2>
+
             <input
               id="searchInput"
               type="text"
@@ -81,48 +81,56 @@
               class="border rounded-full px-3 py-2 w-full md:w-64"
             />
           </div>
-
           <!-- PRICE CATEGORIES -->
-          <div class="grid grid-cols-4 md:grid-cols-7 gap-3 mb-4">
+          <div
+            id="price-categories"
+            class="grid grid-cols-4 md:grid-cols-7 gap-3 mb-4"
+          >
             <button
               onclick="filterByPrice(10)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM10
             </button>
+
             <button
               onclick="filterByPrice(14)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM14
             </button>
+
             <button
               onclick="filterByPrice(15)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM15
             </button>
+
             <button
               onclick="filterByPrice(16)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM16
             </button>
+
             <button
               onclick="filterByPrice(18)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM18
             </button>
+
             <button
               onclick="filterByPrice(20)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM20
             </button>
+
             <button
               onclick="filterByPrice(30)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold"
             >
               RM30
             </button>
@@ -130,47 +138,51 @@
 
           <!-- DRINK CATEGORIES -->
           <div
+            id="drink-categories"
             class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 mb-4"
           >
             <button
               onclick="filterDrink('coffee')"
               class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
-              ☕ Coffee
+              Coffee
             </button>
+
             <button
               onclick="filterDrink('tea')"
               class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
-              🍵 Tea
+              Tea
             </button>
+
             <button
               onclick="filterDrink('soda')"
               class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
-              🥤 Soda
+              Soda
             </button>
+
             <button
               onclick="filterDrink('matcha')"
               class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
-              🍵 Matcha
+              Matcha
             </button>
+
             <button
               onclick="filterDrink('chocolate')"
               class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
-              🍫 Choco
+              Chocolate
             </button>
           </div>
-
           <div
             id="product-grid"
             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3"
           ></div>
         </div>
 
-        <!-- CART -->
+        <!-- CART (FIXED MOBILE + DESKTOP) -->
         <div
           id="cart-panel"
           class="fixed md:static inset-x-0 bottom-0 md:w-96 bg-white border-t md:border-l shadow-lg md:shadow-none flex flex-col transform translate-y-full md:translate-y-0 z-50 max-h-[85vh] md:max-h-none rounded-t-2xl md:rounded-none"
@@ -183,10 +195,12 @@
                 data-lucide="shopping-cart"
                 class="w-5 h-5 text-rose-500 shrink-0"
               ></i>
+
               <h2 class="text-base md:text-lg font-bold truncate">
                 Current Order
               </h2>
             </div>
+
             <button
               onclick="toggleCart()"
               class="md:hidden text-xs bg-black text-white px-2 py-1 rounded-lg shrink-0"
@@ -194,14 +208,17 @@
               ✕
             </button>
           </div>
+
           <div
             id="cart-items"
             class="flex-1 overflow-y-auto p-3 space-y-3 min-h-0"
           ></div>
+
           <div class="p-4 border-t bg-gray-50 space-y-3">
             <div class="flex justify-between text-lg font-bold text-rose-600">
               <div class="space-y-2">
                 <label class="text-xs text-gray-500">Order Type</label>
+
                 <select
                   id="orderType"
                   onchange="setOrderType(this.value)"
@@ -213,6 +230,7 @@
               </div>
               <div class="space-y-2">
                 <label class="text-xs text-gray-500">Discount</label>
+
                 <select
                   id="discount"
                   onchange="renderCart()"
@@ -224,13 +242,15 @@
                 </select>
               </div>
               <span>Total</span>
-              <span id="total">RM0.00</span>
+              <span id="total">$0.00</span>
             </div>
+
             <select id="paymentMethod" class="w-full p-2 border rounded-lg">
               <option value="cash">Cash</option>
               <option value="card">Credit Card</option>
               <option value="qr">QR Pay</option>
             </select>
+
             <button
               onclick="processSale()"
               class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold"
@@ -250,6 +270,7 @@
       <div class="bg-white p-6 rounded-2xl text-center w-full max-w-sm">
         <h2 class="text-xl font-bold">Sale Successful!</h2>
         <p class="text-gray-500 mt-2">Receipt generated</p>
+
         <button
           onclick="closeModal()"
           class="mt-5 bg-gray-800 text-white px-6 py-2 rounded-lg"
@@ -267,6 +288,7 @@
       <div class="bg-white w-full max-w-3xl rounded-2xl overflow-hidden">
         <div class="flex justify-between items-center p-4 border-b">
           <h2 class="font-bold text-lg">Today's Orders</h2>
+
           <button
             onclick="closeHistory()"
             class="bg-black text-white px-3 py-1 rounded-lg"
@@ -274,24 +296,29 @@
             Close
           </button>
         </div>
+
         <div
           id="history-list"
           class="max-h-[70vh] overflow-y-auto p-4 space-y-3"
         ></div>
       </div>
     </div>
-
     <!-- DRINK ADD-ON MODAL -->
     <div
       id="addon-modal"
       class="hidden fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-50"
     >
       <div class="bg-white w-full md:max-w-md rounded-t-2xl md:rounded-2xl p-4">
+        <!-- Title -->
         <div class="flex justify-between items-center mb-3">
           <h2 id="addon-title" class="font-bold text-lg">Customize Drink</h2>
           <button onclick="closeAddonModal()" class="text-gray-500">✕</button>
         </div>
+
+        <!-- Addons list -->
         <div id="addon-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
+
+        <!-- Add button -->
         <button
           onclick="confirmAddToCart()"
           class="w-full mt-4 bg-rose-500 text-white py-3 rounded-xl font-bold"
@@ -301,172 +328,11 @@
       </div>
     </div>
 
-    <!-- ===================== -->
-    <!-- INVENTORY MANAGER MODAL -->
-    <!-- ===================== -->
-    <div
-      id="inventory-modal"
-      class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 md:p-4"
-    >
-      <div
-        class="bg-white w-full max-w-2xl rounded-2xl overflow-hidden flex flex-col max-h-[95vh]"
-      >
-        <!-- Header -->
-        <div class="flex justify-between items-center p-4 border-b bg-gray-50">
-          <h2 class="font-bold text-lg">Inventory Manager</h2>
-          <div class="flex gap-2">
-            <button
-              onclick="openItemForm(null)"
-              class="bg-rose-500 text-white px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1"
-            >
-              <i data-lucide="plus" class="w-4 h-4"></i> Add Item
-            </button>
-            <button
-              onclick="closeInventoryManager()"
-              class="bg-black text-white px-3 py-1.5 rounded-lg text-sm"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-
-        <!-- Search -->
-        <div class="p-3 border-b">
-          <input
-            id="inv-search"
-            type="text"
-            placeholder="Search items..."
-            class="w-full border rounded-xl px-3 py-2 text-sm"
-            oninput="
-              inventorySearchTerm = this.value;
-              renderInventoryList();
-            "
-          />
-        </div>
-
-        <!-- Item Form Panel (hidden by default) -->
-        <div id="item-form-panel" class="hidden border-b bg-yellow-50 p-4">
-          <h3 id="item-form-title" class="font-bold mb-3 text-gray-700">
-            Add New Item
-          </h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <!-- Name -->
-            <div class="sm:col-span-2">
-              <label class="text-xs text-gray-500 mb-1 block"
-                >Item Name *</label
-              >
-              <input
-                id="item-name"
-                type="text"
-                placeholder="e.g. Matcha Croissant"
-                class="w-full border rounded-xl px-3 py-2 text-sm"
-              />
-            </div>
-
-            <!-- Hot Price -->
-            <div>
-              <label class="text-xs text-gray-500 mb-1 block"
-                >🔥 Hot Price (RM)</label
-              >
-              <input
-                id="item-price"
-                type="number"
-                step="0.5"
-                min="0"
-                placeholder="0.00"
-                class="w-full border rounded-xl px-3 py-2 text-sm"
-              />
-              <p class="text-[10px] text-gray-400 mt-1">
-                Leave 0 if no hot option
-              </p>
-            </div>
-
-            <!-- Ice Price -->
-            <div>
-              <label class="text-xs text-gray-500 mb-1 block"
-                >🧊 Ice Price (RM)</label
-              >
-              <input
-                id="item-price-ice"
-                type="number"
-                step="0.5"
-                min="0"
-                placeholder="0.00"
-                class="w-full border rounded-xl px-3 py-2 text-sm"
-              />
-              <p class="text-[10px] text-gray-400 mt-1">
-                Leave 0 if no ice option
-              </p>
-            </div>
-
-            <!-- Category -->
-            <div>
-              <label class="text-xs text-gray-500 mb-1 block">Category *</label>
-              <select
-                id="item-category"
-                class="w-full border rounded-xl px-3 py-2 text-sm"
-              >
-                <option value="pastry">🥐 Pastry</option>
-                <option value="savory">🥪 Savory</option>
-                <option value="coffee">☕ Coffee</option>
-                <option value="tea">🍵 Tea</option>
-                <option value="matcha">🍵 Matcha</option>
-                <option value="soda">🥤 Soda</option>
-                <option value="chocolate">🍫 Chocolate</option>
-                <option value="addon">➕ Add-on</option>
-              </select>
-            </div>
-
-            <!-- Sold Out -->
-            <div class="flex items-center gap-3 pt-4">
-              <input
-                id="item-soldout"
-                type="checkbox"
-                class="w-4 h-4 accent-rose-500"
-              />
-              <label
-                for="item-soldout"
-                class="text-sm font-semibold text-gray-700"
-                >Mark as Sold Out</label
-              >
-            </div>
-          </div>
-
-          <!-- Form Buttons -->
-          <div class="flex gap-2 mt-4">
-            <button
-              onclick="saveItem()"
-              class="flex-1 bg-green-500 text-white py-2 rounded-xl font-bold text-sm"
-            >
-              Save
-            </button>
-            <button
-              onclick="closeItemForm()"
-              class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold text-sm"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-
-        <!-- Item List -->
-        <div
-          id="inventory-list"
-          class="flex-1 overflow-y-auto p-3 space-y-2"
-        ></div>
-
-        <!-- Footer count -->
-        <div class="p-3 border-t bg-gray-50 text-xs text-gray-400 text-center">
-          Total items: <strong>${inventory.length}</strong> — Changes apply to
-          current session only
-        </div>
-      </div>
-    </div>
-
     <!-- SCRIPT -->
     <script>
       function toggleCart() {
         const cart = document.getElementById("cart-panel");
+
         if (cart.classList.contains("translate-y-full")) {
           cart.classList.remove("translate-y-full");
         } else {
@@ -476,6 +342,7 @@
     </script>
 
     <script src="app.js"></script>
+
     <script>
       lucide.createIcons();
     </script>
