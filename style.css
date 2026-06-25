@@ -10,5 +10,5 @@ body {
 }
 
 .checkout-area {
-    padding-bottom: max(70px, env(safe-area-inset-bottom));
+    padding-bottom: max(50px, env(safe-area-inset-bottom));
 }
