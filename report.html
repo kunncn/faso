@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FASO — Excel Helper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background: #f1f5f9;
+      }
+      .tab-active {
+        background: #e11d48;
+        color: white;
+      }
+      .tab-inactive {
+        background: white;
+        color: #6b7280;
+        border: 1px solid #e5e7eb;
+      }
+      .upload-zone {
+        border: 2px dashed #cbd5e1;
+        transition: all 0.2s;
+      }
+      .upload-zone:hover {
+        border-color: #e11d48;
+        background: #fff1f2;
+      }
+      .spinner {
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .fade-in {
+        animation: fadeIn 0.3s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .excel-table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 13px;
+      }
+      .excel-table th {
+        background: #1d6f42;
+        color: white;
+        padding: 7px 10px;
+        text-align: left;
+        white-space: nowrap;
+      }
+      .excel-table td {
+        border: 1px solid #d1d5db;
+        white-space: nowrap;
+      }
+      .excel-table input {
+        width: 100%;
+        border: none;
+        outline: none;
+        padding: 6px 8px;
+        background: transparent;
+        font-size: 13px;
+        font-family: system-ui;
+      }
+      .excel-table input:focus {
+        background: #fefce8;
+      }
+      .excel-table tr:nth-child(even) td {
+        background: #f9fafb;
+      }
+      .excel-table tr:nth-child(even) input {
+        background: transparent;
+      }
+      .excel-table tr:nth-child(even) input:focus {
+        background: #fefce8;
+      }
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #16a34a;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 13px;
+        z-index: 999;
+      }
+      /* hidden textarea for copy fallback */
+      #copy-buffer {
+        position: fixed;
+        top: -9999px;
+        left: -9999px;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <!-- hidden textarea for copy -->
+    <textarea id="copy-buffer"></textarea>
+
+    <!-- NAV -->
+    <nav
+      class="bg-rose-600 text-white px-4 py-3 flex items-center justify-between shadow"
+    >
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🥐</span>
+        <div>
+          <h1 class="font-bold leading-none">FASO Excel Helper</h1>
+          <p class="text-rose-200 text-xs">Photo → Edit → Copy to Excel</p>
+        </div>
+      </div>
+      <a href="index.html" class="text-xs bg-rose-700 px-3 py-1.5 rounded-lg"
+        >← POS</a
+      >
+    </nav>
+
+    <!-- TABS -->
+    <div class="flex gap-2 p-3">
+      <button
+        onclick="switchTab('sales')"
+        id="tab-sales"
+        class="tab-active flex-1 py-2.5 rounded-xl text-xs font-bold"
+      >
+        💰 Sales
+      </button>
+      <button
+        onclick="switchTab('delivery')"
+        id="tab-delivery"
+        class="tab-inactive flex-1 py-2.5 rounded-xl text-xs font-bold"
+      >
+        📦 Delivery
+      </button>
+      <button
+        onclick="switchTab('wastage')"
+        id="tab-wastage"
+        class="tab-inactive flex-1 py-2.5 rounded-xl text-xs font-bold"
+      >
+        🗑️ Wastage
+      </button>
+    </div>
+
+    <div class="px-3 pb-10 space-y-3">
+      <!-- INFO -->
+      <div
+        id="info-box"
+        class="bg-white border rounded-xl p-3 text-xs text-gray-500 leading-relaxed"
+      ></div>
+
+      <!-- DELIVERY QUICK ENTRY -->
+      <div id="delivery-quick" class="hidden">
+        <button
+          onclick="loadDeliveryTemplate()"
+          class="w-full bg-green-500 text-white py-3 rounded-xl font-bold text-sm"
+        >
+          ⚡ Quick Entry — Load all items with prices (just fill QTY)
+        </button>
+      </div>
+
+      <!-- UPLOAD -->
+      <div class="bg-white rounded-2xl border p-4">
+        <p class="text-sm font-bold text-gray-700 mb-3" id="upload-label">
+          📷 Upload photo
+        </p>
+
+        <div
+          class="upload-zone rounded-xl p-8 text-center cursor-pointer"
+          id="dropZone"
+          onclick="document.getElementById('fileInput').click()"
+        >
+          <div class="text-5xl mb-2">📸</div>
+          <p class="text-gray-500 text-sm font-medium">
+            Tap to take photo or upload
+          </p>
+          <p class="text-gray-400 text-xs mt-1">JPEG / PNG</p>
+          <input
+            type="file"
+            id="fileInput"
+            accept="image/*"
+            capture="environment"
+            class="hidden"
+            onchange="handleFile(event)"
+          />
+        </div>
+
+        <div id="preview-wrap" class="hidden mt-3">
+          <img
+            id="preview-img"
+            class="w-full max-h-52 object-contain rounded-xl border mb-3"
+          />
+          <div class="flex gap-2">
+            <button
+              onclick="runAI()"
+              class="flex-1 bg-rose-500 text-white py-2.5 rounded-xl font-bold text-sm"
+            >
+              🔍 Read & Extract
+            </button>
+            <button
+              onclick="resetUpload()"
+              class="px-4 py-2 rounded-xl bg-gray-100 text-gray-500 text-sm"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div id="loading" class="hidden mt-4 text-center py-4">
+          <svg
+            class="spinner w-8 h-8 text-rose-500 mx-auto mb-2"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8z"
+            ></path>
+          </svg>
+          <p class="text-gray-500 text-sm">Reading your paper...</p>
+        </div>
+      </div>
+
+      <!-- RESULT -->
+      <div
+        id="result-card"
+        class="hidden bg-white rounded-2xl border overflow-hidden fade-in"
+      >
+        <!-- Header -->
+        <div
+          class="flex items-center justify-between px-4 py-3 border-b bg-gray-50"
+        >
+          <div>
+            <p class="font-bold text-sm text-gray-800" id="result-title">
+              Extracted Data
+            </p>
+            <p class="text-xs text-gray-400">
+              Edit any cell below if wrong, then copy
+            </p>
+          </div>
+          <button
+            onclick="copyAll()"
+            class="bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-bold"
+          >
+            📋 Copy All
+          </button>
+        </div>
+
+        <!-- Instruction -->
+        <div
+          class="bg-yellow-50 border-b border-yellow-100 px-4 py-2 text-xs text-yellow-700 leading-relaxed"
+        >
+          ✅ <b>Step 1:</b> Check & edit data below &nbsp;|&nbsp;
+          <b>Step 2:</b> Click <b>Copy All</b> &nbsp;|&nbsp; <b>Step 3:</b> Open
+          Excel → click first empty cell → <b>Ctrl+V</b>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="excel-table" id="result-table">
+            <thead id="result-head"></thead>
+            <tbody id="result-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Add row -->
+        <div class="px-4 py-3 border-t flex gap-2 items-center">
+          <button
+            onclick="addRow()"
+            class="flex-1 border-2 border-dashed border-gray-300 text-gray-400 py-2 rounded-xl text-sm hover:border-rose-300 hover:text-rose-400"
+          >
+            + Add missing row
+          </button>
+          <div
+            id="delivery-total"
+            class="text-sm font-bold text-green-700 whitespace-nowrap"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const TABS = {
+        sales: {
+          label: "📷 Take photo of your Sales handwritten notes",
+          info: `📌 Matches <b>SALES UPDATE.xlsx</b> — Columns: DATE | QR | CASH | CARD CREDIT/DEBIT | TOTAL`,
+          headers: ["DATE", "QR", "CASH", "CARD CREDIT/DEBIT", "TOTAL"],
+          fields: ["date", "qr", "cash", "card", "total"],
+          prompt: `You are reading a bakery daily SALES record from a handwritten paper or photo.
+Extract each day's sales into a JSON array. Each object:
+{ "date": string (as written), "qr": number or null, "cash": number or null, "card": number or null, "total": number or null }
+If total not written, calculate: qr + cash + card.
+Return ONLY a valid JSON array. No explanation. No markdown.`,
+        },
+        delivery: {
+          label:
+            "📷 Take photo of your Delivery paper — OR use the quick entry below",
+          info: `📌 Matches <b>DELEVERY HARIAN.xlsx</b> — Columns: QTY | DESCRIPTION | PRICE | AMOUNT<br>Prices are pre-filled from your Excel file. Just enter QTY — amount auto-calculates.`,
+          headers: ["QTY", "DESCRIPTION", "PRICE", "AMOUNT"],
+          fields: ["qty", "description", "price", "amount"],
+          prompt: `You are reading a bakery DELIVERY / RECEIVED sheet photo.
+Extract each item row into JSON array. Each object:
+{ "qty": number or 0, "description": string, "price": number or null, "amount": number or null }
+If amount missing but qty and price exist, calculate amount = qty * price.
+Only include rows with a description.
+Return ONLY a valid JSON array. No explanation. No markdown.`,
+        },
+        wastage: {
+          label: "📷 Take photo of your Wastage paper",
+          info: `📌 Matches <b>wastage1.xlsx</b> — Columns: QTY | DESCRIPTION | REMARK<br>Remark: Expired / Forward / "3Expired 3Forward"`,
+          headers: ["QTY", "DESCRIPTION", "REMARK"],
+          fields: ["qty", "description", "remark"],
+          prompt: `You are reading a bakery WASTAGE sheet photo.
+Extract each item row into JSON array. Each object:
+{ "qty": number or 0, "description": string, "remark": string or "" }
+Remark examples: "Expired", "Forward", "3Expired 3Forward", "4Expired 6Forward".
+If expired and forward are separate columns, combine like "XExpired YForward".
+Return ONLY a valid JSON array. No explanation. No markdown.`,
+        },
+      };
+
+      // =====================
+      // DELIVERY PRICE LIST (from your Excel file)
+      // =====================
+      const PRICE_LIST = [
+        { description: "Wholemeal Sourdough Loft", price: 20 },
+        { description: "Jalapeno Sundried Tomato Cheddar", price: 30 },
+        { description: "Cranberry Walnut", price: 30 },
+        { description: "Blueberry Cream Cheese", price: 30 },
+        { description: "Pistachio Sourdough", price: 30 },
+        { description: "Hazelnut Choc Sourdough Brioche", price: 16 },
+        { description: "Rasberry Vanilla Sourdough Brioche", price: 16 },
+        { description: "Farerro Sourdough", price: 18 },
+        { description: "Chocolate Ganache", price: 18 },
+        { description: "Strawberry Ribbon", price: 18 },
+        { description: "Cheesecake Sourdough", price: 18 },
+        { description: "Pistachio Vanilla", price: 18 },
+        { description: "Coffee Hazelnut", price: 18 },
+        { description: "Matcha Choc", price: 18 },
+        { description: "Double Choc Pain AU", price: 18 },
+        { description: "Blueberry Vanilla", price: 18 },
+        { description: "Pistachio Tiramisu", price: 18 },
+        { description: "Chicken Tomato Sausage", price: 16 },
+        { description: "Turkey Cheese", price: 18 },
+        { description: "Chocolate Pain AU", price: 16 },
+        { description: "Plain Croissant", price: 10 },
+        { description: "Chicken Carbonara Sourdough Croissant", price: 16 },
+        { description: "Mushroom Crem Sourdough Croissant", price: 16 },
+        { description: "Chicken Mushroom Sourdough Baguette", price: 15 },
+        { description: "Tomato Cheese Sourdough Baguette", price: 14 },
+        { description: "Mushroom Cheese Sourdough Baguette", price: 14 },
+        { description: "Spinach Chicken Cheese Quiche", price: 18 },
+        { description: "Mushroom Cheese Quiche", price: 16 },
+        { description: "Salmon Broccoli Quiche", price: 18 },
+        { description: "Tart Hojicha", price: 12 },
+        { description: "Tart Matcha", price: 12 },
+        { description: "Tart Egg Vanilla", price: 10 },
+        { description: "Farero Cannele", price: 12 },
+        { description: "Cherry Chocolate Cannele", price: 12 },
+        { description: "Durian Vanilla Cannele", price: 12 },
+        { description: "Strawberry Cannele", price: 12 },
+        { description: "Blueberry Cannele", price: 12 },
+        { description: "Matcha Cannele", price: 12 },
+        { description: "Plain Cannele", price: 10 },
+        { description: "Cempedak Sourdough Croissant", price: 18 },
+        { description: "Matcha Egg Puff Tart", price: 12 },
+        { description: "Hojicha Egg Puff Tart", price: 14 },
+        { description: "Vanilla Egg Puff Tart", price: 12 },
+        { description: "Sourdough Shiopan", price: 9 },
+        { description: "Tiramisu Ribbon", price: 18 },
+        { description: "Peach Almond Brioche", price: 16 },
+      ];
+
+      function getPrice(description) {
+        const match = PRICE_LIST.find(
+          (p) =>
+            p.description.toLowerCase() === description.toLowerCase().trim(),
+        );
+        return match ? match.price : null;
+      }
+
+      function loadDeliveryTemplate() {
+        currentRows = PRICE_LIST.map((p) => ({
+          qty: 0,
+          description: p.description,
+          price: p.price,
+          amount: 0,
+        }));
+        currentTab = "delivery";
+        renderTable();
+        // Update title
+        document.getElementById("result-title").innerText =
+          `Delivery — ${currentRows.length} items (edit QTY only)`;
+        document.getElementById("result-card").classList.remove("hidden");
+        document
+          .getElementById("result-card")
+          .scrollIntoView({ behavior: "smooth" });
+        if (currentTab === "delivery") updateTotal();
+      }
+
+      let currentTab = "sales";
+      let currentBase64 = null;
+      let currentRows = [];
+
+      switchTab("sales");
+
+      // =====================
+      // TABS
+      // =====================
+      function switchTab(tab) {
+        currentTab = tab;
+        resetUpload();
+        document.getElementById("result-card").classList.add("hidden");
+        currentRows = [];
+
+        // Show/hide quick entry button
+        const quickBtn = document.getElementById("delivery-quick");
+        if (quickBtn) quickBtn.classList.toggle("hidden", tab !== "delivery");
+
+        ["sales", "delivery", "wastage"].forEach((t) => {
+          document.getElementById(`tab-${t}`).className =
+            `${t === tab ? "tab-active" : "tab-inactive"} flex-1 py-2.5 rounded-xl text-xs font-bold transition-all`;
+        });
+
+        const cfg = TABS[tab];
+        document.getElementById("upload-label").innerText = cfg.label;
+        document.getElementById("info-box").innerHTML = cfg.info;
+      }
+
+      // =====================
+      // UPLOAD
+      // =====================
+      function handleFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          currentBase64 = ev.target.result.split(",")[1];
+          document.getElementById("preview-img").src = ev.target.result;
+          document.getElementById("preview-wrap").classList.remove("hidden");
+          document.getElementById("dropZone").classList.add("hidden");
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function resetUpload() {
+        currentBase64 = null;
+        document.getElementById("preview-wrap").classList.add("hidden");
+        document.getElementById("dropZone").classList.remove("hidden");
+        document.getElementById("loading").classList.add("hidden");
+        document.getElementById("fileInput").value = "";
+      }
+
+      // =====================
+      // AI READ
+      // =====================
+      async function runAI() {
+        if (!currentBase64) return;
+        document.getElementById("preview-wrap").classList.add("hidden");
+        document.getElementById("loading").classList.remove("hidden");
+
+        try {
+          const res = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "claude-sonnet-4-6",
+              max_tokens: 2000,
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    {
+                      type: "image",
+                      source: {
+                        type: "base64",
+                        media_type: "image/jpeg",
+                        data: currentBase64,
+                      },
+                    },
+                    { type: "text", text: TABS[currentTab].prompt },
+                  ],
+                },
+              ],
+            }),
+          });
+
+          const data = await res.json();
+          const raw = data.content?.[0]?.text || "[]";
+          const clean = raw.replace(/```json|```/g, "").trim();
+          currentRows = JSON.parse(clean);
+          // Auto-fill prices for delivery tab
+          if (currentTab === "delivery") {
+            currentRows = currentRows.map((r) => {
+              const p = getPrice(r.description);
+              const price = r.price || p || null;
+              const qty = r.qty || 0;
+              const amount = price ? qty * price : r.amount || 0;
+              return { ...r, price, amount };
+            });
+          }
+          document.getElementById("loading").classList.add("hidden");
+          renderTable();
+        } catch (err) {
+          document.getElementById("loading").classList.add("hidden");
+          document.getElementById("preview-wrap").classList.remove("hidden");
+          alert("Error: " + err.message);
+        }
+      }
+
+      // =====================
+      // RENDER TABLE — real inputs
+      // =====================
+      function renderTable() {
+        const cfg = TABS[currentTab];
+
+        document.getElementById("result-head").innerHTML =
+          `<tr>${cfg.headers.map((h) => `<th>${h}</th>`).join("")}</tr>`;
+
+        renderRows();
+        document.getElementById("result-card").classList.remove("hidden");
+        document.getElementById("result-title").innerText =
+          `${currentTab.charAt(0).toUpperCase() + currentTab.slice(1)} — ${currentRows.length} rows`;
+        document
+          .getElementById("result-card")
+          .scrollIntoView({ behavior: "smooth" });
+      }
+
+      function renderRows() {
+        const cfg = TABS[currentTab];
+        const tbody = document.getElementById("result-body");
+        const isDelivery = currentTab === "delivery";
+
+        tbody.innerHTML = currentRows
+          .map((row, i) => {
+            const cells = cfg.fields
+              .map((f) => {
+                const val = escVal(row[f]);
+                // Amount column in delivery = read-only, auto-calculated
+                if (isDelivery && f === "amount") {
+                  return `<td style="background:#f0fdf4; font-weight:600; color:#15803d; padding:6px 8px; text-align:right;"
+              id="amt-${i}">${val}</td>`;
+                }
+                // QTY in delivery — on input recalculate amount
+                if (isDelivery && f === "qty") {
+                  return `<td><input type="number" min="0" value="${val}"
+              style="width:60px; text-align:center;"
+              oninput="updateDeliveryQty(${i}, this.value)"
+              onkeydown="handleKey(event,${i})" /></td>`;
+                }
+                // Price in delivery — editable but smaller
+                if (isDelivery && f === "price") {
+                  return `<td><input type="number" value="${val}"
+              style="width:60px; text-align:right;"
+              oninput="currentRows[${i}]['price']=+this.value; recalcAmount(${i})"
+              onkeydown="handleKey(event,${i})" /></td>`;
+                }
+                return `<td><input type="text" value="${val}"
+            oninput="currentRows[${i}]['${f}']=this.value"
+            onkeydown="handleKey(event,${i})" /></td>`;
+              })
+              .join("");
+
+            return `<tr>${cells}
+          <td style="width:32px; border-left:2px solid #e5e7eb;">
+            <button onclick="deleteRow(${i})" style="color:#f87171;padding:4px 8px;font-size:14px;">✕</button>
+          </td></tr>`;
+          })
+          .join("");
+      }
+
+      function updateDeliveryQty(i, val) {
+        currentRows[i].qty = +val || 0;
+        recalcAmount(i);
+      }
+
+      function recalcAmount(i) {
+        const qty = +currentRows[i].qty || 0;
+        const price = +currentRows[i].price || 0;
+        const amount = qty * price;
+        currentRows[i].amount = amount;
+        const cell = document.getElementById(`amt-${i}`);
+        if (cell) cell.innerText = amount;
+        updateTotal();
+      }
+
+      function updateTotal() {
+        const total = currentRows.reduce((s, r) => s + (+r.amount || 0), 0);
+        const el = document.getElementById("delivery-total");
+        if (el) el.innerText = `TOTAL: ${total}`;
+      }
+
+      function escVal(v) {
+        if (v === null || v === undefined) return "";
+        return String(v).replace(/"/g, "&quot;");
+      }
+
+      // =====================
+      // ADD / DELETE ROW
+      // =====================
+      function addRow() {
+        const cfg = TABS[currentTab];
+        const empty = {};
+        cfg.fields.forEach((f) => (empty[f] = ""));
+        currentRows.push(empty);
+        renderRows();
+        // Focus first input of new row
+        const rows = document
+          .getElementById("result-body")
+          .querySelectorAll("tr");
+        const lastRow = rows[rows.length - 1];
+        if (lastRow) lastRow.querySelector("input").focus();
+      }
+
+      function deleteRow(i) {
+        currentRows.splice(i, 1);
+        renderRows();
+        document.getElementById("result-title").innerText =
+          `${currentTab.charAt(0).toUpperCase() + currentTab.slice(1)} — ${currentRows.length} rows`;
+      }
+
+      // Tab key moves between cells
+      function handleKey(e, rowIdx) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const inputs = document
+            .getElementById("result-body")
+            .querySelectorAll("input");
+          const cfg = TABS[currentTab];
+          const totalFields = cfg.fields.length;
+          const currentInput = e.target;
+          const allInputs = Array.from(inputs);
+          const idx = allInputs.indexOf(currentInput);
+          const next = allInputs[idx + 1];
+          if (next) next.focus();
+        }
+      }
+
+      // =====================
+      // COPY — textarea fallback (works in local files)
+      // =====================
+      function copyAll() {
+        const cfg = TABS[currentTab];
+
+        // Sync all input values to currentRows first
+        const inputs = document
+          .getElementById("result-body")
+          .querySelectorAll("input");
+        const totalFields = cfg.fields.length;
+        inputs.forEach((input, idx) => {
+          const rowIdx = Math.floor(idx / totalFields);
+          const fieldIdx = idx % totalFields;
+          if (currentRows[rowIdx]) {
+            currentRows[rowIdx][cfg.fields[fieldIdx]] = input.value;
+          }
+        });
+
+        // Build TSV
+        const lines = currentRows.map((row) =>
+          cfg.fields
+            .map((f) => {
+              const v = row[f];
+              return v === null || v === undefined ? "" : String(v);
+            })
+            .join("\t"),
+        );
+        const tsv = lines.join("\r\n");
+
+        // Use textarea fallback — works in file:// protocol
+        const buf = document.getElementById("copy-buffer");
+        buf.value = tsv;
+        buf.select();
+        buf.setSelectionRange(0, 99999);
+
+        const ok = document.execCommand("copy");
+        if (ok) {
+          showToast(
+            `✅ ${currentRows.length} rows copied! Open Excel → click cell → Ctrl+V`,
+          );
+        } else {
+          // Last resort — show text to manually copy
+          showManualCopy(tsv);
+        }
+      }
+
+      function showManualCopy(text) {
+        const buf = document.getElementById("copy-buffer");
+        buf.style.position = "static";
+        buf.style.width = "100%";
+        buf.style.height = "120px";
+        buf.style.fontSize = "11px";
+        buf.style.padding = "8px";
+        buf.style.border = "2px solid #f87171";
+        buf.style.borderRadius = "8px";
+        buf.value = text;
+        buf.select();
+        document.getElementById("result-card").appendChild(buf);
+        alert(
+          "Auto-copy failed. The text is selected in the box below — press Ctrl+C to copy manually.",
+        );
+      }
+
+      function showToast(msg) {
+        const old = document.querySelector(".toast");
+        if (old) old.remove();
+        const t = document.createElement("div");
+        t.className = "toast";
+        t.innerText = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3500);
+      }
+    </script>
+  </body>
+</html>
