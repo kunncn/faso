@@ -156,11 +156,7 @@ fetch("./addons.json")
   });
 
 function isDrink(id) {
-  const item = inventory.find((i) => i.id === id);
-  return (
-    item &&
-    ["coffee", "tea", "matcha", "soda", "chocolate"].includes(item.category)
-  );
+  return id >= 101;
 }
 
 function setOrderType(value) {
