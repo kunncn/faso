@@ -598,7 +598,7 @@
   {
     "id": 134,
     "name": "Oat Milk",
-    "price": 0.0,
+    "price": 10.0,
     "soldOut": false,
     "category": "addon"
   },
@@ -608,5 +608,19 @@
     "price": 15.0,
     "soldOut": false,
     "category": "savory"
+  },
+  {
+    "id": 136,
+    "name": "Water",
+    "price": 1.5,
+    "soldOut": false,
+    "category": "addon"
+  },
+  {
+    "id": 137,
+    "name": " Milk",
+    "price": 10.0,
+    "soldOut": false,
+    "category": "addon"
   }
 ]
