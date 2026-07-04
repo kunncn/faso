@@ -20,6 +20,16 @@ const categoryEmoji = {
   chocolate: "🍫",
 };
 
+function resetDB() {
+  if (!confirm("Reset all inventory data?")) return;
+  const tx = db.transaction("inventory", "readwrite");
+  tx.objectStore("inventory").clear();
+  tx.oncomplete = () => {
+    alert("Done! Reloading...");
+    location.reload();
+  };
+}
+
 function showCategoryScreen() {
   document.getElementById("product-grid").innerHTML =
     `<div class="text-gray-400 text-center col-span-full">
