@@ -425,6 +425,10 @@ function renderCart() {
   document.getElementById("total").innerText = `RM${finalTotal.toFixed(2)}`;
 
   lucide.createIcons();
+  document.getElementById("order-count").innerText = cart.reduce(
+    (total, item) => total + item.qty,
+    0,
+  );
 }
 
 function removeFromCart(index) {

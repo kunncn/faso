@@ -193,6 +193,12 @@
               ></i>
               <h2 class="text-base md:text-lg font-bold truncate">
                 Current Order
+                <span
+                  id="order-count"
+                  class="bg-rose-500 text-white text-xs px-2 py-0.5 rounded-full"
+                >
+                  0
+                </span>
               </h2>
             </div>
             <button
@@ -211,7 +217,9 @@
               <!-- Row 1: Order Type + Discount -->
               <div class="flex gap-2">
                 <div class="flex-1">
-                  <label class="text-xs text-gray-400 font-black">Order Type</label>
+                  <label class="text-xs text-gray-400 font-black"
+                    >Order Type</label
+                  >
                   <select
                     id="orderType"
                     onchange="setOrderType(this.value)"
@@ -222,7 +230,9 @@
                   </select>
                 </div>
                 <div class="flex-1">
-                  <label class="text-xs text-gray-400 font-black">Discount</label>
+                  <label class="text-xs text-gray-400 font-black"
+                    >Discount</label
+                  >
                   <select
                     id="discount"
                     onchange="renderCart()"
