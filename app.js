@@ -497,6 +497,15 @@ function processSale() {
 
   cart = [];
   renderCart();
+  // Reset form to default values
+  document.getElementById("orderType").value = "dinein";
+  selectedOrderType = "dinein";
+
+  document.getElementById("discount").value = "0";
+
+  document.getElementById("discountDrinks").checked = false;
+
+  document.getElementById("paymentMethod").value = "cash";
 
   if (window.innerWidth < 768) {
     document.getElementById("cart-panel").classList.add("translate-y-full");
