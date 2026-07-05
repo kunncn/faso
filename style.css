@@ -9,6 +9,6 @@ body {
     transform: scale(0.95);
 }
 
-.checkout-area {
+/* .checkout-area {
     padding-bottom: max(70px, env(safe-area-inset-bottom));
-}
+} */
