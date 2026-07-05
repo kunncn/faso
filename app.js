@@ -6,6 +6,7 @@ let selectedProduct = null;
 let selectedTemp = null; // "hot" | "ice" | null
 let db;
 let selectedOrderType = "dinein";
+// const discountAmt = sub * discount;
 
 let inventory = [];
 let cart = [];
@@ -407,7 +408,18 @@ function renderCart() {
     return total + (item.price + addonTotal) * item.qty;
   }, 0);
 
-  const discountAmt = sub * discount;
+  // const discountAmt = sub * discount;
+  const includeDrinks =
+    document.getElementById("discountDrinks")?.checked || false;
+  const drinkCats = ["coffee", "tea", "matcha", "soda", "chocolate"];
+  const discountAmt = cart.reduce((total, item) => {
+    if (drinkCats.includes(item.category) && !includeDrinks) return total;
+    const addonTotal = item.addons
+      ? item.addons.reduce((s, a) => s + a.price, 0)
+      : 0;
+    return total + (item.price + addonTotal) * item.qty * discount;
+  }, 0);
+
   const finalTotal = sub - discountAmt;
 
   document.getElementById("total").innerText = `RM${finalTotal.toFixed(2)}`;
@@ -439,7 +451,16 @@ function processSale() {
     return total + (item.price + addonTotal) * item.qty;
   }, 0);
 
-  const discountAmt = sub * discountRate;
+  const includeDrinks =
+    document.getElementById("discountDrinks")?.checked || false;
+  const drinkCats = ["coffee", "tea", "matcha", "soda", "chocolate"];
+  const discountAmt = cart.reduce((total, item) => {
+    if (drinkCats.includes(item.category) && !includeDrinks) return total;
+    const addonTotal = item.addons
+      ? item.addons.reduce((s, a) => s + a.price, 0)
+      : 0;
+    return total + (item.price + addonTotal) * item.qty * discountRate;
+  }, 0);
   const finalTotal = sub - discountAmt;
 
   // Full detail saved to IndexedDB
