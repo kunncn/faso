@@ -1,14 +1,193 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
+:root {
+    --glass: rgba(255, 255, 255, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.35);
+    --shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #fffafb;
+    background:
+        radial-gradient(circle at top left, #ffe6ee 0%, transparent 35%),
+        radial-gradient(circle at bottom right, #fff4d6 0%, transparent 35%),
+        #fffafb;
+    perspective: 1200px;
+}
+
+/* Smooth animation everywhere */
+* {
+    transition:
+        background .3s ease,
+        color .3s ease,
+        box-shadow .3s ease,
+        transform .35s cubic-bezier(.2, .8, .2, 1),
+        border-color .3s ease;
+}
+
+/* ==========================
+   Glass Effect
+========================== */
+
+nav,
+#cart-panel,
+#history-modal>div,
+#inventory-modal>div,
+#addon-modal>div,
+#modal>div {
+    background: rgba(255, 255, 255, .78);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, .35);
+    box-shadow: var(--shadow);
+}
+
+/* Inputs */
+
+input,
+select {
+    background: rgba(255, 255, 255, .75);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, .4);
+    box-shadow: inset 0 1px 4px rgba(255, 255, 255, .4);
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: #fb7185;
+    box-shadow:
+        0 0 0 4px rgba(251, 113, 133, .15),
+        0 10px 20px rgba(0, 0, 0, .08);
+}
+
+/* ==========================
+   Buttons
+========================== */
+
+button {
+    transform: translateZ(0);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .08);
+}
+
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, .18);
+}
+
+button:active {
+    transform: scale(.96);
+}
+
+/* ==========================
+   3D Product Card
+========================== */
+
+.pastry-card {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, .72);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+
+    border: 1px solid rgba(255, 255, 255, .45);
+
+    transform-style: preserve-3d;
+
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, .10),
+        inset 0 1px rgba(255, 255, 255, .8);
+}
+
+.pastry-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, .55),
+            transparent 40%);
+    pointer-events: none;
+}
+
+.pastry-card:hover {
+    transform:
+        rotateX(6deg) rotateY(-6deg) translateY(-8px) translateZ(20px);
+
+    box-shadow:
+        0 25px 40px rgba(0, 0, 0, .18),
+        0 8px 15px rgba(251, 113, 133, .18);
 }
 
 .pastry-card:active {
-    transform: scale(0.95);
+    transform:
+        scale(.96) translateY(2px);
 }
 
-/* .checkout-area {
-    padding-bottom: max(70px, env(safe-area-inset-bottom));
-} */
+/* Lift content inside card */
+
+.pastry-card h3,
+.pastry-card p,
+.pastry-card div {
+    transform: translateZ(25px);
+}
+
+/* ==========================
+   Cart Items
+========================== */
+
+#cart-items>div {
+    background: rgba(255, 255, 255, .65);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, .35);
+}
+
+#cart-items>div:hover {
+    transform: translateX(4px);
+}
+
+/* ==========================
+   Inventory List
+========================== */
+
+#inventory-list>div:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, .12);
+}
+
+/* ==========================
+   Modal Animation
+========================== */
+
+#modal>div,
+#history-modal>div,
+#inventory-modal>div,
+#addon-modal>div {
+    animation: popup .28s ease;
+}
+
+@keyframes popup {
+    from {
+        opacity: 0;
+        transform: scale(.9) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Nice scrollbar */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(251, 113, 133, .45);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(251, 113, 133, .7);
+}
