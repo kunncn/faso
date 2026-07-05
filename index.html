@@ -211,7 +211,7 @@
               <!-- Row 1: Order Type + Discount -->
               <div class="flex gap-2">
                 <div class="flex-1">
-                  <label class="text-xs text-gray-400">Order Type</label>
+                  <label class="text-xs text-gray-400 font-black">Order Type</label>
                   <select
                     id="orderType"
                     onchange="setOrderType(this.value)"
@@ -222,7 +222,7 @@
                   </select>
                 </div>
                 <div class="flex-1">
-                  <label class="text-xs text-gray-400">Discount</label>
+                  <label class="text-xs text-gray-400 font-black">Discount</label>
                   <select
                     id="discount"
                     onchange="renderCart()"
@@ -244,14 +244,14 @@
                   onchange="renderCart()"
                   class="w-4 h-4 accent-rose-500"
                 />
-                <span class="text-xs text-gray-400"
+                <span class="text-xs text-gray-400 font-black"
                   >Apply Discount To Drinks</span
                 >
               </label>
 
               <!-- Row 3: Total -->
               <div class="flex justify-between items-center pt-1">
-                <span class="font-bold text-gray-300">Total</span>
+                <span class="font-bold text-gray-400">Total</span>
                 <span id="total" class="text-xl font-bold text-rose-500"
                   >RM0.00</span
                 >
