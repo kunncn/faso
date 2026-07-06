@@ -21,34 +21,6 @@ const categoryEmoji = {
   chocolate: "🍫",
 };
 
-// =====================
-// CUSTOMER DISPLAY SYNC
-// =====================
-const orderChannel = new BroadcastChannel("faso-order");
-
-function broadcastOrderToCustomerScreen(finalTotal, discountRate, discountAmt) {
-  const items = cart.map((item) => {
-    const addonTotal = item.addons
-      ? item.addons.reduce((s, a) => s + a.price, 0)
-      : 0;
-    return {
-      name: item.name,
-      qty: item.qty,
-      temp: item.temp || null,
-      addons: item.addons ? item.addons.map((a) => a.name) : [],
-      lineTotal: (item.price + addonTotal) * item.qty,
-    };
-  });
-
-  orderChannel.postMessage({
-    type: "update",
-    items,
-    total: finalTotal,
-    discountRate: discountRate || 0,
-    discountAmt: discountAmt || 0,
-  });
-}
-
 function resetDB() {
   if (!confirm("Reset all inventory data?")) return;
   const tx = db.transaction("inventory", "readwrite");
@@ -457,9 +429,6 @@ function renderCart() {
     (total, item) => total + item.qty,
     0,
   );
-
-  // push live order to customer-facing screen
-  broadcastOrderToCustomerScreen(finalTotal, discount, discountAmt);
 }
 
 function removeFromCart(index) {
@@ -530,11 +499,8 @@ function processSale() {
   saveSale(sale);
   renderOrderHistory();
 
-  // tell customer screen: sale done, show thank-you
-  orderChannel.postMessage({ type: "complete", total: finalTotal });
-
   cart = [];
-  renderCart(); // this also clears the customer screen back to "waiting" state
+  renderCart();
   // Reset form to default values
   document.getElementById("orderType").value = "dinein";
   selectedOrderType = "dinein";
