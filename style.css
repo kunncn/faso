@@ -176,18 +176,3 @@ button:active {
         transform: scale(1) translateY(0);
     }
 }
-
-/* Nice scrollbar */
-
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(251, 113, 133, .45);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(251, 113, 133, .7);
-}
