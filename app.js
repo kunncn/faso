@@ -22,45 +22,149 @@ const categoryEmoji = {
 };
 
 // =====================
-// CUSTOMER DISPLAY SYNC
+// STAFF PINS (for bill edit authorization)
 // =====================
-const orderChannel = new BroadcastChannel("faso-order");
-let customerWindowRef = null;
+const STAFF_PINS = {
+  3009: "Ko Ko",
+  1234: "John",
+};
 
+// =====================
+// CUSTOMER BIG-SCREEN POPUP
+// =====================
 function openCustomerDisplay() {
-  // reuse same window if already open, else create new one
-  if (customerWindowRef && !customerWindowRef.closed) {
-    customerWindowRef.focus();
-    return;
-  }
-  customerWindowRef = window.open(
-    "customer.html",
-    "fasoCustomerDisplay",
-    "width=900,height=700",
-  );
+  const popup = document.getElementById("customer-popup");
+  popup.classList.remove("hidden");
+  popup.classList.add("flex");
+  renderCustomerPopup();
 }
 
-function broadcastOrderToCustomerScreen(finalTotal, discountRate, discountAmt) {
-  const items = cart.map((item) => {
-    const addonTotal = item.addons
-      ? item.addons.reduce((s, a) => s + a.price, 0)
-      : 0;
-    return {
-      name: item.name,
-      qty: item.qty,
-      temp: item.temp || null,
-      addons: item.addons ? item.addons.map((a) => a.name) : [],
-      lineTotal: (item.price + addonTotal) * item.qty,
-    };
-  });
+function closeCustomerDisplay() {
+  const popup = document.getElementById("customer-popup");
+  popup.classList.add("hidden");
+  popup.classList.remove("flex");
+}
 
-  orderChannel.postMessage({
-    type: "update",
-    items,
-    total: finalTotal,
-    discountRate: discountRate || 0,
-    discountAmt: discountAmt || 0,
-  });
+function renderCustomerPopup() {
+  const popup = document.getElementById("customer-popup");
+  const body = document.getElementById("customer-popup-body");
+  if (!popup || !body) return;
+  // Only render if popup is currently open (saves work while hidden)
+  if (popup.classList.contains("hidden")) return;
+
+  if (cart.length === 0) {
+    body.innerHTML = `
+      <h2 class="text-2xl md:text-3xl font-semibold text-gray-700">Welcome</h2>
+      <p class="text-gray-400 mt-2 text-base md:text-lg">Please place your order at the counter</p>
+    `;
+    return;
+  }
+
+  const discount = parseFloat(document.getElementById("discount")?.value || 0);
+  const includeDrinks =
+    document.getElementById("discountDrinks")?.checked || false;
+  const drinkCats = ["coffee", "tea", "matcha", "soda", "chocolate"];
+
+  let sub = 0;
+  let discountAmt = 0;
+
+  // scale row text size down a little as the order grows, so it still
+  // fits on one screen without scrolling
+  const count = cart.length;
+  let rowText = "text-lg md:text-xl";
+  let rowPad = "py-3";
+  if (count > 8 && count <= 14) {
+    rowText = "text-base md:text-lg";
+    rowPad = "py-2";
+  } else if (count > 14) {
+    rowText = "text-sm md:text-base";
+    rowPad = "py-1.5";
+  }
+
+  const rowsHTML = cart
+    .map((item) => {
+      const addonTotal = item.addons
+        ? item.addons.reduce((s, a) => s + a.price, 0)
+        : 0;
+      const lineTotal = (item.price + addonTotal) * item.qty;
+      sub += lineTotal;
+      if (!(drinkCats.includes(item.category) && !includeDrinks)) {
+        discountAmt += lineTotal * discount;
+      }
+
+      const tempLabel =
+        item.temp === "hot" ? " (Hot)" : item.temp === "ice" ? " (Ice)" : "";
+      const addonsText = item.addons?.length
+        ? `<div class="text-xs md:text-sm text-gray-400">+ ${item.addons.map((a) => a.name).join(", ")}</div>`
+        : "";
+
+      return `
+        <tr class="border-b border-gray-200">
+          <td class="${rowPad} pr-3 text-left ${rowText} text-gray-800 font-medium">
+            ${item.name}${tempLabel}
+            ${addonsText}
+          </td>
+          <td class="${rowPad} px-3 text-center ${rowText} text-gray-500">${item.qty}</td>
+          <td class="${rowPad} pl-3 text-right ${rowText} text-gray-800 font-semibold">RM${lineTotal.toFixed(2)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const finalTotal = sub - discountAmt;
+
+  const discountLine =
+    discount > 0 && discountAmt > 0
+      ? `
+      <div class="flex justify-between text-gray-500 text-base md:text-lg py-1">
+        <span>Subtotal</span><span>RM${sub.toFixed(2)}</span>
+      </div>
+      <div class="flex justify-between text-gray-500 text-base md:text-lg py-1">
+        <span>Discount (${(discount * 100).toFixed(0)}%)</span><span>-RM${discountAmt.toFixed(2)}</span>
+      </div>
+    `
+      : "";
+
+  body.innerHTML = `
+    <div class="w-full max-w-3xl">
+      <div class="flex justify-between items-baseline border-b border-gray-300 pb-3 mb-1">
+        <h2 class="text-xl md:text-2xl font-semibold text-gray-800">Your Order</h2>
+        <span class="text-sm text-gray-400">${cart.reduce((t, i) => t + i.qty, 0)} item${cart.reduce((t, i) => t + i.qty, 0) > 1 ? "s" : ""}</span>
+      </div>
+
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="text-xs md:text-sm text-gray-400 uppercase tracking-wide">
+            <th class="text-left font-medium py-2">Item</th>
+            <th class="text-center font-medium py-2 w-16">Qty</th>
+            <th class="text-right font-medium py-2 w-28">Price</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHTML}</tbody>
+      </table>
+
+      <div class="border-t border-gray-300 mt-2 pt-3">
+        ${discountLine}
+        <div class="flex justify-between items-center pt-2 border-t border-gray-200 mt-1">
+          <span class="text-lg md:text-xl font-semibold text-gray-700">Total</span>
+          <span class="text-3xl md:text-4xl font-bold text-gray-900">RM${finalTotal.toFixed(2)}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showThankYouPopup(total) {
+  const popup = document.getElementById("customer-popup");
+  if (!popup || popup.classList.contains("hidden")) return; // only if open
+
+  const body = document.getElementById("customer-popup-body");
+  body.innerHTML = `
+    <h2 class="text-2xl md:text-3xl font-semibold text-gray-800">Thank You</h2>
+    <p class="text-gray-500 mt-2 text-base md:text-lg">Total Paid: <span class="font-semibold text-gray-900">RM${total.toFixed(2)}</span></p>
+  `;
+
+  setTimeout(() => renderCustomerPopup(), 4000);
 }
 
 function resetDB() {
@@ -324,6 +428,24 @@ function saveSale(sale) {
   tx.objectStore("sales").add(sale);
 }
 
+// Get a single sale by id
+function getSaleById(id, callback) {
+  const tx = db.transaction("sales", "readonly");
+  const req = tx.objectStore("sales").get(id);
+  req.onsuccess = function () {
+    callback(req.result);
+  };
+}
+
+// Update an existing sale (used for bill edit)
+function updateSaleInDB(sale, callback) {
+  const tx = db.transaction("sales", "readwrite");
+  tx.objectStore("sales").put(sale);
+  tx.oncomplete = function () {
+    if (callback) callback();
+  };
+}
+
 // =====================
 // PRODUCTS
 // =====================
@@ -472,8 +594,8 @@ function renderCart() {
     0,
   );
 
-  // push live order to customer-facing screen
-  broadcastOrderToCustomerScreen(finalTotal, discount, discountAmt);
+  // keep the customer big-screen popup in sync (only does work if open)
+  renderCustomerPopup();
 }
 
 function removeFromCart(index) {
@@ -539,16 +661,18 @@ function processSale() {
     discountAmt,
     total: finalTotal,
     date: new Date().toLocaleString(),
+    editedBy: null,
+    editedAt: null,
   };
 
   saveSale(sale);
   renderOrderHistory();
 
-  // tell customer screen: sale done, show thank-you
-  orderChannel.postMessage({ type: "complete", total: finalTotal });
+  // show thank-you on customer big-screen popup (if open)
+  showThankYouPopup(finalTotal);
 
   cart = [];
-  renderCart(); // this also clears the customer screen back to "waiting" state
+  renderCart();
   // Reset form to default values
   document.getElementById("orderType").value = "dinein";
   selectedOrderType = "dinein";
@@ -807,6 +931,10 @@ function showOrderHistory() {
           })
           .join("");
 
+        const editedBadge = sale.editedBy
+          ? `<div class="text-[11px] text-gray-400 mt-1">✎ Edited by <strong>${sale.editedBy}</strong> · ${sale.editedAt}</div>`
+          : "";
+
         return `
           <div class="border rounded-xl overflow-hidden mb-3">
             <!-- Header -->
@@ -824,7 +952,7 @@ function showOrderHistory() {
             <div class="px-3 pt-2 pb-1">${itemsHTML}</div>
 
             <!-- Totals -->
-            <div class="px-3 pb-3 pt-1 space-y-1 text-sm">
+            <div class="px-3 pb-2 pt-1 space-y-1 text-sm">
               <div class="flex justify-between text-gray-500">
                 <span>Subtotal</span>
                 <span>RM${sale.subtotal.toFixed(2)}</span>
@@ -841,6 +969,15 @@ function showOrderHistory() {
                 <span>Total</span>
                 <span>RM${sale.total.toFixed(2)}</span>
               </div>
+            </div>
+
+            <!-- Edit bill row -->
+            <div class="px-3 pb-3 flex items-center justify-between">
+              ${editedBadge || "<span></span>"}
+              <button onclick="openEditBillModal(${sale.id})"
+                class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg font-bold">
+                Edit Payment
+              </button>
             </div>
           </div>
         `;
@@ -865,6 +1002,55 @@ function formatTo12Hour(dateString) {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
+  });
+}
+
+// =====================
+// EDIT BILL (change payment + record who edited)
+// =====================
+let editBillSaleId = null;
+
+function openEditBillModal(saleId) {
+  editBillSaleId = saleId;
+  document.getElementById("edit-staff-pin").value = "";
+  document.getElementById("edit-bill-error").classList.add("hidden");
+
+  getSaleById(saleId, (sale) => {
+    if (!sale) return;
+    document.getElementById("edit-payment-method").value = sale.payment;
+  });
+
+  document.getElementById("edit-bill-modal").classList.remove("hidden");
+}
+
+function closeEditBillModal() {
+  document.getElementById("edit-bill-modal").classList.add("hidden");
+  editBillSaleId = null;
+}
+
+function saveEditBill() {
+  const pin = document.getElementById("edit-staff-pin").value.trim();
+  const staffName = STAFF_PINS[pin];
+  const errorEl = document.getElementById("edit-bill-error");
+
+  if (!staffName) {
+    errorEl.innerText = "Wrong PIN. Try again.";
+    errorEl.classList.remove("hidden");
+    return;
+  }
+
+  const newPayment = document.getElementById("edit-payment-method").value;
+
+  getSaleById(editBillSaleId, (sale) => {
+    if (!sale) return;
+    sale.payment = newPayment;
+    sale.editedBy = staffName;
+    sale.editedAt = new Date().toLocaleString();
+
+    updateSaleInDB(sale, () => {
+      closeEditBillModal();
+      showOrderHistory(); // refresh list with updated info
+    });
   });
 }
 
