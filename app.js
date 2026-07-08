@@ -25,6 +25,20 @@ const categoryEmoji = {
 // CUSTOMER DISPLAY SYNC
 // =====================
 const orderChannel = new BroadcastChannel("faso-order");
+let customerWindowRef = null;
+
+function openCustomerDisplay() {
+  // reuse same window if already open, else create new one
+  if (customerWindowRef && !customerWindowRef.closed) {
+    customerWindowRef.focus();
+    return;
+  }
+  customerWindowRef = window.open(
+    "customer.html",
+    "fasoCustomerDisplay",
+    "width=900,height=700",
+  );
+}
 
 function broadcastOrderToCustomerScreen(finalTotal, discountRate, discountAmt) {
   const items = cart.map((item) => {

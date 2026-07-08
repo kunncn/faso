@@ -24,7 +24,10 @@
       <div class="flex items-center gap-2">
         <i data-lucide="croissant" class="w-7 h-7 md:w-8 md:h-8"></i>
         <h1 class="text-lg md:text-2xl font-bold tracking-tighter">
-          FASO <span class="font-light text-xs md:text-sm">PASTRY POS</span>
+          FASO
+          <span class="font-light text-xs md:text-sm tracking-wide"
+            >PATISSERIE</span
+          >
         </h1>
       </div>
       <div class="flex gap-2 items-center flex-wrap justify-center">
@@ -39,6 +42,12 @@
           class="bg-white text-rose-500 px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
         >
           History
+        </button>
+        <button
+          onclick="openCustomerDisplay()"
+          class="bg-blue-500 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
+        >
+          Customer Screen
         </button>
         <button
           onclick="resetDB()"
