@@ -265,11 +265,13 @@ function renderAddonList() {
     tempHTML = `
       <div class="flex gap-2 mb-3">
         <button id="btn-hot" onclick="selectTemp('hot')"
-          class="flex-1 py-2 rounded-xl border-2 font-bold text-sm ${selectedTemp === "hot" ? "border-[#008697] bg-[#e6f2f3] text-[#00707f]" : "border-gray-200 text-gray-400"}">
+          class="flex-1 py-2 rounded-xl border-2 font-bold text-sm transition-all
+            ${selectedTemp === "hot" ? "border-[#008697] bg-[#e6f2f3] text-[#00707f]" : "border-gray-200 text-gray-400"}">
           🔥 Hot — RM${selectedProduct.price.toFixed(2)}
         </button>
         <button id="btn-ice" onclick="selectTemp('ice')"
-          class="flex-1 py-2 rounded-xl border-2 font-bold text-sm ${selectedTemp === "ice" ? "border-blue-500 bg-blue-50 text-blue-600" : "border-gray-200 text-gray-400"}">
+          class="flex-1 py-2 rounded-xl border-2 font-bold text-sm transition-all
+            ${selectedTemp === "ice" ? "border-blue-500 bg-blue-50 text-blue-600" : "border-gray-200 text-gray-400"}">
           🧊 Ice — RM${selectedProduct.priceIce.toFixed(2)}
         </button>
       </div>
@@ -285,7 +287,7 @@ function renderAddonList() {
   const addonsHTML = addons
     .map(
       (a) => `
-    <label class="flex justify-between p-2 border rounded-lg cursor-pointer">
+    <label class="flex justify-between p-2 border rounded-lg cursor-pointer hover:bg-gray-50">
       <div>
         <input type="checkbox" value="${a.id}" />
         <span class="ml-2">${a.name}</span>
@@ -340,23 +342,6 @@ function openDB() {
     db = e.target.result;
     loadInventory();
     renderOrderHistory();
-    cleanupOldSales();
-  };
-}
-
-// keep only the last 3 months of sales; older records are removed
-function cleanupOldSales() {
-  const cutoff = new Date();
-  cutoff.setMonth(cutoff.getMonth() - 3);
-  const cutoffKey = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, "0")}-${String(cutoff.getDate()).padStart(2, "0")}`;
-
-  const tx = db.transaction("sales", "readwrite");
-  const store = tx.objectStore("sales");
-  const req = store.getAll();
-  req.onsuccess = function () {
-    req.result.forEach((sale) => {
-      if (sale.dateKey < cutoffKey) store.delete(sale.id);
-    });
   };
 }
 
@@ -461,233 +446,6 @@ function updateSaleInDB(sale, callback) {
   };
 }
 
-// Get every sale ever stored (used by the report, which spans months)
-function getAllSales(callback) {
-  const tx = db.transaction("sales", "readonly");
-  const req = tx.objectStore("sales").getAll();
-  req.onsuccess = function () {
-    callback(req.result);
-  };
-}
-
-// =====================
-// SALES REPORT (weekly/daily comparison + charts + Excel export)
-// =====================
-let currentReportData = null;
-let reportChartWeek = null;
-let reportChartDay = null;
-const REPORT_DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const REPORT_COLORS = [
-  "#008697",
-  "#C0504D",
-  "#9BBB59",
-  "#8064A2",
-  "#4BACC6",
-  "#F79646",
-  "#264478",
-];
-
-function openSalesReport() {
-  const monthInput = document.getElementById("report-month");
-  if (!monthInput.value) {
-    const now = new Date();
-    monthInput.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  }
-  document.getElementById("report-modal").classList.remove("hidden");
-  generateSalesReport();
-}
-
-function closeSalesReport() {
-  document.getElementById("report-modal").classList.add("hidden");
-}
-
-function generateSalesReport() {
-  const monthVal = document.getElementById("report-month").value; // "YYYY-MM"
-  if (!monthVal) return;
-  const [year, month] = monthVal.split("-").map(Number); // month is 1-12
-
-  getAllSales((allSales) => {
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const numWeeks = Math.ceil(daysInMonth / 7);
-    // matrix[dayIdx 0=Mon..6=Sun][weekIdx 0-based] = total sales
-    const matrix = REPORT_DAY_NAMES.map(() => Array(numWeeks).fill(0));
-
-    allSales.forEach((sale) => {
-      const d = new Date(sale.dateKey + "T00:00:00");
-      if (d.getFullYear() !== year || d.getMonth() + 1 !== month) return;
-      const dayOfMonth = d.getDate();
-      const weekIdx = Math.ceil(dayOfMonth / 7) - 1;
-      const jsDay = d.getDay(); // 0=Sun..6=Sat
-      const dayIdx = jsDay === 0 ? 6 : jsDay - 1; // convert to Mon=0..Sun=6
-      matrix[dayIdx][weekIdx] += sale.total;
-    });
-
-    currentReportData = { year, month, numWeeks, matrix };
-    renderSalesReport();
-  });
-}
-
-function renderSalesReport() {
-  if (!currentReportData) return;
-  const { year, month, numWeeks, matrix } = currentReportData;
-
-  let totalSales = 0;
-  let daysWithSales = 0;
-  matrix.forEach((row) =>
-    row.forEach((v) => {
-      if (v > 0) {
-        totalSales += v;
-        daysWithSales++;
-      }
-    }),
-  );
-  const avgPerDay = daysWithSales > 0 ? totalSales / daysWithSales : 0;
-
-  // highlight the best-selling day in each week column
-  const maxPerWeek = [];
-  for (let w = 0; w < numWeeks; w++) {
-    let max = 0;
-    for (let i = 0; i < 7; i++) if (matrix[i][w] > max) max = matrix[i][w];
-    maxPerWeek.push(max);
-  }
-
-  let theadWeeks = "";
-  for (let w = 1; w <= numWeeks; w++)
-    theadWeeks += `<th class="border px-3 py-2 text-sm">Week ${w}</th>`;
-
-  let rows = "";
-  REPORT_DAY_NAMES.forEach((day, i) => {
-    let cells = "";
-    for (let w = 0; w < numWeeks; w++) {
-      const v = matrix[i][w];
-      const isMax = v > 0 && v === maxPerWeek[w];
-      cells += `<td class="border px-3 py-2 text-sm text-right ${isMax ? "bg-yellow-200 font-bold" : ""}">${v > 0 ? v.toFixed(2) : ""}</td>`;
-    }
-    rows += `<tr><td class="border px-3 py-2 text-sm font-semibold bg-gray-50">${day}</td>${cells}</tr>`;
-  });
-
-  if (totalSales === 0) {
-    document.getElementById("report-body").innerHTML = `
-      <p class="text-gray-400 text-center py-10">No sales data for this month.</p>
-    `;
-    return;
-  }
-
-  const monthLabel = new Date(year, month - 1, 1).toLocaleString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-
-  document.getElementById("report-body").innerHTML = `
-    <h3 class="font-bold text-gray-700 mb-3">Sales Comparison - ${monthLabel}</h3>
-    <div class="overflow-x-auto">
-      <table class="border-collapse w-full mb-2 min-w-[500px]">
-        <thead><tr class="bg-gray-100"><th class="border px-3 py-2 text-sm text-left">Day</th>${theadWeeks}</tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-    <div class="flex gap-3 justify-end text-sm mb-6 flex-wrap">
-      <div class="bg-[#e6f2f3] px-4 py-2 rounded-lg"><strong>Total Sales:</strong> RM${totalSales.toFixed(2)}</div>
-      <div class="bg-[#e6f2f3] px-4 py-2 rounded-lg"><strong>Average per day:</strong> RM${avgPerDay.toFixed(2)}</div>
-    </div>
-    <div class="border rounded-xl p-3 mb-6">
-      <canvas id="chart-by-week" height="220"></canvas>
-    </div>
-    <div class="border rounded-xl p-3">
-      <canvas id="chart-by-day" height="220"></canvas>
-    </div>
-  `;
-
-  drawReportCharts();
-}
-
-function drawReportCharts() {
-  const { numWeeks, matrix } = currentReportData;
-  const weekLabels = Array.from(
-    { length: numWeeks },
-    (_, i) => `Week ${i + 1}`,
-  );
-
-  const byWeekDatasets = REPORT_DAY_NAMES.map((day, i) => ({
-    label: day,
-    data: matrix[i],
-    backgroundColor: REPORT_COLORS[i % REPORT_COLORS.length],
-  }));
-
-  if (reportChartWeek) reportChartWeek.destroy();
-  reportChartWeek = new Chart(document.getElementById("chart-by-week"), {
-    type: "bar",
-    data: { labels: weekLabels, datasets: byWeekDatasets },
-    options: {
-      responsive: true,
-      plugins: { title: { display: true, text: "Comparison by Week" } },
-    },
-  });
-
-  const byDayDatasets = weekLabels.map((wk, wIdx) => ({
-    label: wk,
-    data: REPORT_DAY_NAMES.map((_, dIdx) => matrix[dIdx][wIdx]),
-    backgroundColor: REPORT_COLORS[wIdx % REPORT_COLORS.length],
-  }));
-
-  if (reportChartDay) reportChartDay.destroy();
-  reportChartDay = new Chart(document.getElementById("chart-by-day"), {
-    type: "bar",
-    data: { labels: REPORT_DAY_NAMES, datasets: byDayDatasets },
-    options: {
-      responsive: true,
-      plugins: { title: { display: true, text: "Comparison by Day" } },
-    },
-  });
-}
-
-function exportSalesReport() {
-  if (!currentReportData) return;
-  const { year, month, numWeeks, matrix } = currentReportData;
-
-  let totalSales = 0;
-  let daysWithSales = 0;
-  matrix.forEach((row) =>
-    row.forEach((v) => {
-      if (v > 0) {
-        totalSales += v;
-        daysWithSales++;
-      }
-    }),
-  );
-  const avgPerDay = daysWithSales > 0 ? totalSales / daysWithSales : 0;
-
-  const weekHeaders = Array.from(
-    { length: numWeeks },
-    (_, i) => `Week ${i + 1}`,
-  );
-  const rows = [["Day", ...weekHeaders, "", "Total Sales", "Average per day"]];
-
-  REPORT_DAY_NAMES.forEach((day, i) => {
-    const rowVals = matrix[i].map((v) => (v > 0 ? Number(v.toFixed(2)) : ""));
-    const extra =
-      i === 0
-        ? ["", Number(totalSales.toFixed(2)), Number(avgPerDay.toFixed(2))]
-        : ["", "", ""];
-    rows.push([day, ...rowVals, ...extra]);
-  });
-
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws["!cols"] = [
-    { wch: 8 },
-    ...weekHeaders.map(() => ({ wch: 10 })),
-    { wch: 2 },
-    { wch: 14 },
-    { wch: 16 },
-  ];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
-  XLSX.writeFile(
-    wb,
-    `faso-sales-report-${year}-${String(month).padStart(2, "0")}.xlsx`,
-  );
-}
-
 // =====================
 // PRODUCTS
 // =====================
@@ -711,7 +469,7 @@ function renderProducts(list = inventory) {
 
       return `
         <div onclick="addToCart(${item.id})"
-          class="pastry-card ${item.color} bg-white p-5 rounded-2xl border cursor-pointer">
+          class="pastry-card ${item.color} bg-white p-5 rounded-2xl shadow-sm border cursor-pointer hover:shadow-md">
           <div class="w-full h-32 bg-gray-50 rounded-xl mb-4 flex items-center justify-center text-4xl">
             ${categoryEmoji[item.category] || "🍽️"}
           </div>
@@ -796,7 +554,7 @@ function renderCart() {
           </div>
           <div class="flex items-center gap-3 shrink-0">
             <span class="font-bold">RM${lineTotal.toFixed(2)}</span>
-            <button onclick="removeFromCart(${idx})" class="text-gray-400">
+            <button onclick="removeFromCart(${idx})" class="text-gray-400 hover:text-red-500">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
@@ -1349,7 +1107,7 @@ function renderInventoryList() {
       const emoji = categoryEmoji[item.category] || "🍽️";
 
       return `
-      <div class="flex items-center gap-3 p-3 border rounded-xl bg-white">
+      <div class="flex items-center gap-3 p-3 border rounded-xl bg-white hover:bg-gray-50">
         <div class="text-2xl shrink-0">${emoji}</div>
         <div class="flex-1 min-w-0">
           <div class="font-semibold text-sm truncate">${item.name}</div>
@@ -1362,11 +1120,11 @@ function renderInventoryList() {
         </div>
         <div class="flex gap-2 shrink-0">
           <button onclick="openItemForm(${item.id})"
-            class="p-2 rounded-lg bg-blue-50 text-blue-600">
+            class="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100">
             <i data-lucide="pencil" class="w-4 h-4"></i>
           </button>
           <button onclick="deleteItem(${item.id})"
-            class="p-2 rounded-lg bg-red-50 text-red-500">
+            class="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </div>
