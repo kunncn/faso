@@ -19,7 +19,7 @@
   <body class="h-screen flex flex-col overflow-hidden">
     <!-- NAV -->
     <nav
-      class="bg-rose-500 text-white p-3 md:p-4 flex flex-col md:flex-row gap-2 justify-between items-center shadow-lg"
+      class="bg-[#008697] text-white p-3 md:p-4 flex flex-col md:flex-row gap-2 justify-between items-center shadow-lg"
     >
       <div class="flex items-center gap-2">
         <i data-lucide="croissant" class="w-7 h-7 md:w-8 md:h-8"></i>
@@ -39,7 +39,7 @@
         </button>
         <button
           onclick="showOrderHistory()"
-          class="bg-white text-rose-500 px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
+          class="bg-white text-[#008697] px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
         >
           History
         </button>
@@ -51,7 +51,7 @@
         </button>
         <button
           onclick="resetDB()"
-          class="bg-rose-800 text-white px-2 py-1 rounded text-xs opacity-20 hover:opacity-100"
+          class="bg-[#00434c] text-white px-2 py-1 rounded text-xs opacity-20 hover:opacity-100"
         >
           ⚙
         </button>
@@ -64,7 +64,7 @@
         <!-- MOBILE CART BUTTON -->
         <button
           onclick="toggleCart()"
-          class="md:hidden bg-white text-rose-500 px-3 py-1 rounded-lg font-bold"
+          class="md:hidden bg-white text-[#008697] px-3 py-1 rounded-lg font-bold"
         >
           Cart
         </button>
@@ -198,13 +198,13 @@
             <div class="flex items-center gap-2 min-w-0">
               <i
                 data-lucide="shopping-cart"
-                class="w-5 h-5 text-rose-500 shrink-0"
+                class="w-5 h-5 text-[#008697] shrink-0"
               ></i>
               <h2 class="text-base md:text-lg font-bold truncate">
                 Current Order
                 <span
                   id="order-count"
-                  class="bg-rose-500 text-white text-xs px-2 py-0.5 rounded-full"
+                  class="bg-[#008697] text-white text-xs px-2 py-0.5 rounded-full"
                 >
                   0
                 </span>
@@ -261,7 +261,7 @@
                   type="checkbox"
                   id="discountDrinks"
                   onchange="renderCart()"
-                  class="w-4 h-4 accent-rose-500"
+                  class="w-4 h-4 accent-[#008697]"
                 />
                 <span class="text-xs text-gray-400 font-black"
                   >Apply Discount To Drinks</span
@@ -271,7 +271,7 @@
               <!-- Row 3: Total -->
               <div class="flex justify-between items-center pt-1">
                 <span class="font-bold text-gray-400">Total</span>
-                <span id="total" class="text-xl font-bold text-rose-500"
+                <span id="total" class="text-xl font-bold text-[#008697]"
                   >RM0.00</span
                 >
               </div>
@@ -423,7 +423,7 @@
         <div id="addon-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
         <button
           onclick="confirmAddToCart()"
-          class="w-full mt-4 bg-rose-500 text-white py-3 rounded-xl font-bold"
+          class="w-full mt-4 bg-[#008697] text-white py-3 rounded-xl font-bold"
         >
           Add to Cart
         </button>
@@ -446,7 +446,7 @@
           <div class="flex gap-2">
             <button
               onclick="openItemForm(null)"
-              class="bg-rose-500 text-white px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1"
+              class="bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1"
             >
               <i data-lucide="plus" class="w-4 h-4"></i> Add Item
             </button>
@@ -551,7 +551,7 @@
               <input
                 id="item-soldout"
                 type="checkbox"
-                class="w-4 h-4 accent-rose-500"
+                class="w-4 h-4 accent-[#008697]"
               />
               <label
                 for="item-soldout"

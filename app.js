@@ -266,7 +266,7 @@ function renderAddonList() {
       <div class="flex gap-2 mb-3">
         <button id="btn-hot" onclick="selectTemp('hot')"
           class="flex-1 py-2 rounded-xl border-2 font-bold text-sm transition-all
-            ${selectedTemp === "hot" ? "border-rose-500 bg-rose-50 text-rose-600" : "border-gray-200 text-gray-400"}">
+            ${selectedTemp === "hot" ? "border-[#008697] bg-[#e6f2f3] text-[#00707f]" : "border-gray-200 text-gray-400"}">
           🔥 Hot — RM${selectedProduct.price.toFixed(2)}
         </button>
         <button id="btn-ice" onclick="selectTemp('ice')"
@@ -292,7 +292,7 @@ function renderAddonList() {
         <input type="checkbox" value="${a.id}" />
         <span class="ml-2">${a.name}</span>
       </div>
-      <span class="text-rose-500">RM${a.price.toFixed(2)}</span>
+      <span class="text-[#008697]">RM${a.price.toFixed(2)}</span>
     </label>
   `,
     )
@@ -460,11 +460,11 @@ function renderProducts(list = inventory) {
 
       let priceLabel = "";
       if (hasHot && hasIce) {
-        priceLabel = `<p class="text-rose-500 font-bold mt-1 text-xs">🔥RM${item.price.toFixed(2)} / 🧊RM${item.priceIce.toFixed(2)}</p>`;
+        priceLabel = `<p class="text-[#008697] font-bold mt-1 text-xs">🔥RM${item.price.toFixed(2)} / 🧊RM${item.priceIce.toFixed(2)}</p>`;
       } else if (!hasHot && hasIce) {
         priceLabel = `<p class="text-blue-500 font-bold mt-1">🧊 RM${item.priceIce.toFixed(2)}</p>`;
       } else {
-        priceLabel = `<p class="text-rose-500 font-bold mt-1">RM${item.price.toFixed(2)}</p>`;
+        priceLabel = `<p class="text-[#008697] font-bold mt-1">RM${item.price.toFixed(2)}</p>`;
       }
 
       return `
@@ -522,7 +522,7 @@ function renderCart() {
 
       const tempBadge =
         item.temp === "hot"
-          ? `<span class="text-[10px] bg-rose-100 text-rose-600 px-2 py-0.5 rounded">🔥 Hot</span>`
+          ? `<span class="text-[10px] bg-[#cce6e9] text-[#00707f] px-2 py-0.5 rounded">🔥 Hot</span>`
           : item.temp === "ice"
             ? `<span class="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded">🧊 Ice</span>`
             : "";
@@ -547,7 +547,7 @@ function renderCart() {
               item.addons?.length
                 ? `<div class="text-[11px] text-gray-400 mt-1">
                     + ${item.addons.map((a) => a.name).join(", ")}
-                    <span class="text-rose-500 font-semibold">(+RM${addonTotal.toFixed(2)})</span>
+                    <span class="text-[#008697] font-semibold">(+RM${addonTotal.toFixed(2)})</span>
                    </div>`
                 : ""
             }
@@ -872,11 +872,11 @@ function showOrderHistory() {
       .reduce((s, sale) => s + sale.total, 0);
 
     const summaryHTML = `
-      <div class="bg-rose-50 border border-rose-200 rounded-xl p-4 mb-4">
-        <h3 class="font-bold text-rose-600 mb-2">Today Summary</h3>
+      <div class="bg-[#e6f2f3] border border-[#99cdd3] rounded-xl p-4 mb-4">
+        <h3 class="font-bold text-[#00707f] mb-2">Today Summary</h3>
         <div class="grid grid-cols-2 gap-2 text-sm">
           <div>Total Orders: <strong>${totalOrders}</strong></div>
-          <div>Revenue: <strong class="text-rose-600">RM${totalRevenue.toFixed(2)}</strong></div>
+          <div>Revenue: <strong class="text-[#00707f]">RM${totalRevenue.toFixed(2)}</strong></div>
           <div>Cash: <strong>RM${cashTotal.toFixed(2)}</strong></div>
           <div>Card: <strong>RM${cardTotal.toFixed(2)}</strong></div>
           <div>QR: <strong>RM${qrTotal.toFixed(2)}</strong></div>
@@ -903,7 +903,7 @@ function showOrderHistory() {
             const addonsText = item.addons?.length
               ? `<div class="text-[11px] text-gray-400 pl-2">
                 + ${item.addons.map((a) => a.name).join(", ")}
-                <span class="text-rose-500">(+RM${item.addonTotal.toFixed(2)})</span>
+                <span class="text-[#008697]">(+RM${item.addonTotal.toFixed(2)})</span>
                </div>`
               : "";
 
@@ -914,7 +914,7 @@ function showOrderHistory() {
 
             const itemTemp =
               item.temp === "hot"
-                ? `<span class="text-[10px] bg-rose-100 text-rose-500 px-1 rounded">🔥 Hot</span>`
+                ? `<span class="text-[10px] bg-[#cce6e9] text-[#008697] px-1 rounded">🔥 Hot</span>`
                 : item.temp === "ice"
                   ? `<span class="text-[10px] bg-blue-100 text-blue-500 px-1 rounded">🧊 Ice</span>`
                   : "";
@@ -965,7 +965,7 @@ function showOrderHistory() {
                    </div>`
                   : ""
               }
-              <div class="flex justify-between font-bold text-rose-600 border-t pt-1">
+              <div class="flex justify-between font-bold text-[#00707f] border-t pt-1">
                 <span>Total</span>
                 <span>RM${sale.total.toFixed(2)}</span>
               </div>
