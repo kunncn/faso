@@ -1218,7 +1218,7 @@ function showOrderHistory() {
               ${editedBadge || "<span></span>"}
               <button onclick="openEditBillModal(${sale.id})"
                 class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg font-bold">
-                Edit Payment
+                ✏️
               </button>
             </div>
           </div>

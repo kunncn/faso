@@ -55,10 +55,10 @@ select {
 input:focus,
 select:focus {
     outline: none;
-    border-color: #fb7185;
+    border-color: #008697;
     box-shadow:
-        0 0 0 4px rgba(251, 113, 133, .15),
-        0 10px 20px rgba(0, 0, 0, .08);
+        0 0 0 2px rgba(0, 134, 151, 0.35),
+        0 12px 24px rgba(0, 134, 151, 0.15);
 }
 
 /* ==========================
