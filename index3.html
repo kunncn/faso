@@ -31,7 +31,7 @@
       <div class="flex gap-2 items-center flex-wrap justify-center">
         <button
           onclick="exportPDF()"
-          class="bg-black text-white px-3 py-1 md:px-4 md:py-2 rounded-lg text-sm md:text-base"
+          class="bg-white text-[#008697] font-black px-3 py-1 md:px-4 md:py-2 rounded-lg text-sm md:text-base"
         >
           Export Bills
         </button>
@@ -49,22 +49,23 @@
         </button>
         <button
           onclick="openCustomerDisplay()"
-          class="bg-blue-500 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
+          class="bg-white text-[#008697] px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
         >
-          Customer Screen
-        </button>
-        <button
-          onclick="resetDB()"
-          class="bg-[#00434c] text-white px-2 py-1 rounded text-xs opacity-20"
-        >
-          ⚙
+          Customer Side
         </button>
         <button
           onclick="openInventoryManager()"
-          class="bg-yellow-400 text-black px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
+          class="bg-white text-[#008697] px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
         >
           Inventory
         </button>
+        <button
+          onclick="resetDB()"
+          class="bg-white text-[#008697] px-2 py-1 rounded text-xs opacity-20"
+        >
+          ⚙
+        </button>
+
         <!-- MOBILE CART BUTTON -->
         <button
           onclick="toggleCart()"
@@ -101,49 +102,49 @@
           <div class="grid grid-cols-4 md:grid-cols-8 gap-3 mb-4">
             <button
               onclick="filterByPrice(10)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM10
             </button>
             <button
               onclick="filterByPrice(12)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM12
             </button>
             <button
               onclick="filterByPrice(14)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM14
             </button>
             <button
               onclick="filterByPrice(15)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM15
             </button>
             <button
               onclick="filterByPrice(16)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM16
             </button>
             <button
               onclick="filterByPrice(18)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM18
             </button>
             <button
               onclick="filterByPrice(20)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM20
             </button>
             <button
               onclick="filterByPrice(30)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM30
             </button>
@@ -155,31 +156,31 @@
           >
             <button
               onclick="filterDrink('coffee')"
-              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               ☕ Coffee
             </button>
             <button
               onclick="filterDrink('tea')"
-              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               🍵 Tea
             </button>
             <button
               onclick="filterDrink('soda')"
-              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               🥤 Soda
             </button>
             <button
               onclick="filterDrink('matcha')"
-              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               🍵 Matcha
             </button>
             <button
               onclick="filterDrink('chocolate')"
-              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               🍫 Choco
             </button>
@@ -287,7 +288,7 @@
             </select>
             <button
               onclick="processSale()"
-              class="w-full bg-green-500 text-white py-3 rounded-xl font-bold"
+              class="w-full bg-[#008697] text-white py-3 rounded-xl font-bold"
             >
               COMPLETE SALE
             </button>

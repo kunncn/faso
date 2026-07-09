@@ -32,10 +32,7 @@ const STAFF_PINS = {
 // =====================
 // CUSTOMER BIG-SCREEN POPUP
 // =====================
-let customerPopupMode = "live"; // "live" = current cart, "history" = a past bill
-
 function openCustomerDisplay() {
-  customerPopupMode = "live";
   const popup = document.getElementById("customer-popup");
   popup.classList.remove("hidden");
   popup.classList.add("flex");
@@ -46,14 +43,12 @@ function closeCustomerDisplay() {
   const popup = document.getElementById("customer-popup");
   popup.classList.add("hidden");
   popup.classList.remove("flex");
-  customerPopupMode = "live";
 }
 
 function renderCustomerPopup() {
   const popup = document.getElementById("customer-popup");
   const body = document.getElementById("customer-popup-body");
   if (!popup || !body) return;
-  if (customerPopupMode !== "live") return; // a past bill is showing, don't overwrite it
   // Only render if popup is currently open (saves work while hidden)
   if (popup.classList.contains("hidden")) return;
 
@@ -154,84 +149,6 @@ function renderCustomerPopup() {
           <span class="text-lg md:text-xl font-semibold text-gray-700">Total</span>
           <span class="text-3xl md:text-4xl font-bold text-gray-900">RM${finalTotal.toFixed(2)}</span>
         </div>
-      </div>
-    </div>
-  `;
-}
-
-// show a completed bill (from History) in the same full-screen popup
-function openBillFullScreen(saleId) {
-  getSaleById(saleId, (sale) => {
-    if (!sale) return;
-    customerPopupMode = "history";
-    renderBillPopup(sale);
-    const popup = document.getElementById("customer-popup");
-    popup.classList.remove("hidden");
-    popup.classList.add("flex");
-  });
-}
-
-function renderBillPopup(sale) {
-  const body = document.getElementById("customer-popup-body");
-
-  const rowsHTML = sale.items
-    .map((item) => {
-      const tempLabel =
-        item.temp === "hot" ? " (Hot)" : item.temp === "ice" ? " (Ice)" : "";
-      const addonsText = item.addons?.length
-        ? `<div class="text-xs md:text-sm text-gray-400">+ ${item.addons.map((a) => a.name).join(", ")}</div>`
-        : "";
-
-      return `
-        <tr class="border-b border-gray-200">
-          <td class="py-3 pr-3 text-left text-lg md:text-xl text-gray-800 font-medium">
-            ${item.name}${tempLabel}
-            ${addonsText}
-          </td>
-          <td class="py-3 px-3 text-center text-lg md:text-xl text-gray-500">${item.qty}</td>
-          <td class="py-3 pl-3 text-right text-lg md:text-xl text-gray-800 font-semibold">RM${item.lineTotal.toFixed(2)}</td>
-        </tr>
-      `;
-    })
-    .join("");
-
-  const discountLine =
-    sale.discountAmt > 0
-      ? `
-      <div class="flex justify-between text-gray-500 text-base md:text-lg py-1">
-        <span>Subtotal</span><span>RM${sale.subtotal.toFixed(2)}</span>
-      </div>
-      <div class="flex justify-between text-gray-500 text-base md:text-lg py-1">
-        <span>Discount (${(sale.discountRate * 100).toFixed(0)}%)</span><span>-RM${sale.discountAmt.toFixed(2)}</span>
-      </div>
-    `
-      : "";
-
-  body.innerHTML = `
-    <div class="w-full max-w-3xl">
-      <div class="flex justify-between items-baseline border-b border-gray-300 pb-3 mb-1">
-        <h2 class="text-xl md:text-2xl font-semibold text-gray-800">Order Receipt</h2>
-        <span class="text-sm text-gray-400">${formatTo12Hour(sale.date)}</span>
-      </div>
-
-      <table class="w-full border-collapse">
-        <thead>
-          <tr class="text-xs md:text-sm text-gray-400 uppercase tracking-wide">
-            <th class="text-left font-medium py-2">Item</th>
-            <th class="text-center font-medium py-2 w-16">Qty</th>
-            <th class="text-right font-medium py-2 w-28">Price</th>
-          </tr>
-        </thead>
-        <tbody>${rowsHTML}</tbody>
-      </table>
-
-      <div class="border-t border-gray-300 mt-2 pt-3">
-        ${discountLine}
-        <div class="flex justify-between items-center pt-2 border-t border-gray-200 mt-1">
-          <span class="text-lg md:text-xl font-semibold text-gray-700">Total</span>
-          <span class="text-3xl md:text-4xl font-bold text-gray-900">RM${sale.total.toFixed(2)}</span>
-        </div>
-        <div class="text-sm text-gray-400 mt-2 text-right uppercase">${sale.payment}</div>
       </div>
     </div>
   `;
@@ -1297,18 +1214,12 @@ function showOrderHistory() {
             </div>
 
             <!-- Edit bill row -->
-            <div class="px-3 pb-3 flex items-center justify-between gap-2 flex-wrap">
+            <div class="px-3 pb-3 flex items-center justify-between">
               ${editedBadge || "<span></span>"}
-              <div class="flex gap-2">
-                <button onclick="openBillFullScreen(${sale.id})"
-                  class="text-xs bg-[#008697] text-white px-3 py-1.5 rounded-lg font-bold">
-                  Full Screen
-                </button>
-                <button onclick="openEditBillModal(${sale.id})"
-                  class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg font-bold">
-                  Edit Payment
-                </button>
-              </div>
+              <button onclick="openEditBillModal(${sale.id})"
+                class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg font-bold">
+                ✏️
+              </button>
             </div>
           </div>
         `;
