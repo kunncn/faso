@@ -11,8 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" href="./assets/imgs/faso-logo.ico" type="image/x-icon" />
-    <style>
-    </style>
+    <style></style>
   </head>
 
   <body class="h-screen flex flex-col overflow-hidden">
@@ -32,7 +31,7 @@
       <div class="flex gap-2 items-center flex-wrap justify-center">
         <button
           onclick="exportPDF()"
-          class="bg-black text-white px-3 py-1 md:px-4 md:py-2 rounded-lg text-sm md:text-base"
+          class="bg-white text-[#008697] font-bold px-3 py-1 md:px-4 md:py-2 rounded-lg text-sm md:text-base"
         >
           Export Bills
         </button>
@@ -50,21 +49,21 @@
         </button>
         <button
           onclick="openCustomerDisplay()"
-          class="bg-blue-500 text-white px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
+          class="bg-white text-[#008697] px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
         >
-          Customer Screen
+          Customer Side
+        </button>
+        <button
+          onclick="openInventoryManager()"
+          class="bg-white text-[#008697] px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
+        >
+          Inventory
         </button>
         <button
           onclick="resetDB()"
           class="bg-[#00434c] text-white px-2 py-1 rounded text-xs opacity-20"
         >
           ⚙
-        </button>
-        <button
-          onclick="openInventoryManager()"
-          class="bg-yellow-400 text-black px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
-        >
-          Inventory
         </button>
         <!-- MOBILE CART BUTTON -->
         <button
@@ -102,49 +101,49 @@
           <div class="grid grid-cols-4 md:grid-cols-8 gap-3 mb-4">
             <button
               onclick="filterByPrice(10)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM10
             </button>
             <button
               onclick="filterByPrice(12)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM12
             </button>
             <button
               onclick="filterByPrice(14)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM14
             </button>
             <button
               onclick="filterByPrice(15)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM15
             </button>
             <button
               onclick="filterByPrice(16)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM16
             </button>
             <button
               onclick="filterByPrice(18)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM18
             </button>
             <button
               onclick="filterByPrice(20)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM20
             </button>
             <button
               onclick="filterByPrice(30)"
-              class="bg-yellow-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
               RM30
             </button>
@@ -156,33 +155,33 @@
           >
             <button
               onclick="filterDrink('coffee')"
-              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
-              ☕ Coffee
+              Coffee
             </button>
             <button
               onclick="filterDrink('tea')"
-              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
-              🍵 Tea
+              Tea
             </button>
             <button
               onclick="filterDrink('soda')"
-              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
-              🥤 Soda
+              Soda
             </button>
             <button
               onclick="filterDrink('matcha')"
-              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
-              🍵 Matcha
+              Matcha
             </button>
             <button
               onclick="filterDrink('chocolate')"
-              class="bg-blue-100 aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
+              class="bg-white text-[#008697] aspect-square flex items-center justify-center rounded-xl font-bold text-sm"
             >
-              🍫 Choco
+              Choco
             </button>
           </div>
 
@@ -287,8 +286,10 @@
               <option value="qr">QR Pay</option>
             </select>
             <button
+              bg-white
+              text-[]
               onclick="processSale()"
-              class="w-full bg-green-500 text-white py-3 rounded-xl font-bold"
+              class="w-full bg-[#008697] text-white py-3 rounded-xl font-bold"
             >
               COMPLETE SALE
             </button>
@@ -344,7 +345,9 @@
       <div class="bg-white w-full max-w-sm rounded-2xl p-5">
         <h2 class="font-bold text-lg mb-4">Edit Payment Method</h2>
 
-        <label class="text-xs text-gray-500 mb-1 block">New Payment Method</label>
+        <label class="text-xs text-gray-500 mb-1 block"
+          >New Payment Method</label
+        >
         <select
           id="edit-payment-method"
           class="w-full border rounded-xl px-3 py-2 text-sm mb-4"
@@ -354,7 +357,9 @@
           <option value="qr">QR Pay</option>
         </select>
 
-        <label class="text-xs text-gray-500 mb-1 block">Staff PIN (to confirm edit)</label>
+        <label class="text-xs text-gray-500 mb-1 block"
+          >Staff PIN (to confirm edit)</label
+        >
         <input
           id="edit-staff-pin"
           type="password"
@@ -363,7 +368,9 @@
           placeholder="Enter your PIN"
           class="w-full border rounded-xl px-3 py-2 text-sm mb-2"
         />
-        <p id="edit-bill-error" class="hidden text-red-500 text-xs mb-2">Wrong PIN. Try again.</p>
+        <p id="edit-bill-error" class="hidden text-red-500 text-xs mb-2">
+          Wrong PIN. Try again.
+        </p>
 
         <div class="flex gap-2 mt-2">
           <button
@@ -429,8 +436,12 @@
       id="customer-popup"
       class="hidden fixed inset-0 bg-white z-[9999] flex-col p-6 md:p-10"
     >
-      <div class="flex justify-between items-center border-b border-gray-200 pb-4 mb-4">
-        <h1 class="text-xl md:text-2xl font-semibold text-gray-800 tracking-tight">
+      <div
+        class="flex justify-between items-center border-b border-gray-200 pb-4 mb-4"
+      >
+        <h1
+          class="text-xl md:text-2xl font-semibold text-gray-800 tracking-tight"
+        >
           FASO PASTRY
         </h1>
         <button
@@ -574,7 +585,6 @@
               >
                 <option value="pastry">🥐 Pastry</option>
                 <option value="savory">🥪 Savory</option>
-                <option value="loaf">🍞 Loaf</option>
                 <option value="coffee">☕ Coffee</option>
                 <option value="tea">🍵 Tea</option>
                 <option value="matcha">🍵 Matcha</option>
