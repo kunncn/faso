@@ -120,7 +120,7 @@
   },
   {
     "id": 18,
-    "name": "Chicken Sausage",
+    "name": "Chicken Sausage Tomato Sourdough Croissant",
     "price": 16.0,
     "soldOut": false,
     "category": "savory"
@@ -622,5 +622,26 @@
     "price": 10.0,
     "soldOut": false,
     "category": "addon"
+  },
+  {
+    "id": 138,
+    "name": "Mango Rice Pudding Sourdough Croissant",
+    "price": 18.0,
+    "soldOut": false,
+    "category": "pastry"
+  },
+  {
+    "id": 139,
+    "name": "Chicken Sausage Cheese Sourdough Croissant",
+    "price": 16.0,
+    "soldOut": false,
+    "category": "savory"
+  },
+  {
+    "id": 140,
+    "name": "Piccolo latte",
+    "price": 7.0,
+    "soldOut": false,
+    "category": "coffee"
   }
 ]
