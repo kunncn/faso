@@ -14,8 +14,8 @@ const priceCategories = [10, 14, 15, 16, 18, 20, 30];
 const categoryEmoji = {
   pastry: "🥐",
   savory: "🥪",
-  coffee: "☕",
   loaf: "🍞",
+  coffee: "☕",
   tea: "🍵",
   soda: "🥤",
   matcha: "🍵",
@@ -94,7 +94,10 @@ function renderCustomerPopup() {
         : 0;
       const lineTotal = (item.price + addonTotal) * item.qty;
       sub += lineTotal;
-      if (!(drinkCats.includes(item.category) && !includeDrinks)) {
+      if (
+        item.category !== "loaf" &&
+        !(drinkCats.includes(item.category) && !includeDrinks)
+      ) {
         discountAmt += lineTotal * discount;
       }
 
@@ -903,6 +906,7 @@ function renderCart() {
     document.getElementById("discountDrinks")?.checked || false;
   const drinkCats = ["coffee", "tea", "matcha", "soda", "chocolate"];
   const discountAmt = cart.reduce((total, item) => {
+    if (item.category === "loaf") return total;
     if (drinkCats.includes(item.category) && !includeDrinks) return total;
     const addonTotal = item.addons
       ? item.addons.reduce((s, a) => s + a.price, 0)
@@ -952,6 +956,7 @@ function processSale() {
     document.getElementById("discountDrinks")?.checked || false;
   const drinkCats = ["coffee", "tea", "matcha", "soda", "chocolate"];
   const discountAmt = cart.reduce((total, item) => {
+    if (item.category === "loaf") return total;
     if (drinkCats.includes(item.category) && !includeDrinks) return total;
     const addonTotal = item.addons
       ? item.addons.reduce((s, a) => s + a.price, 0)

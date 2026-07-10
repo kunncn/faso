@@ -4,35 +4,35 @@
     "name": "Wholemeal Sourdough Loaf",
     "price": 20.0,
     "soldOut": false,
-    "category": "pastry"
+    "category": "loaf"
   },
   {
     "id": 2,
     "name": "Jalapeno Sundried Tomato Cheddar",
     "price": 30.0,
     "soldOut": false,
-    "category": "pastry"
+    "category": "loaf"
   },
   {
     "id": 3,
     "name": "Cranberry Walnut",
     "price": 30.0,
     "soldOut": false,
-    "category": "pastry"
+    "category": "loaf"
   },
   {
     "id": 4,
     "name": "Blueberry Cream Cheese",
     "price": 30.0,
     "soldOut": false,
-    "category": "pastry"
+    "category": "loaf"
   },
   {
     "id": 5,
     "name": "Pistachio Sourdough Fig",
     "price": 30.0,
     "soldOut": false,
-    "category": "pastry"
+    "category": "loaf"
   },
   {
     "id": 6,
