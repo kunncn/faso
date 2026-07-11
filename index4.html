@@ -45,7 +45,7 @@
         </button>
         <button
           onclick="openSalesReport()"
-          class="bg-white text-[#008697] px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
+          class="bg-white text-[#008697] px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base border border-[#008697]"
         >
           Sales Report
         </button>
@@ -199,15 +199,6 @@
           class="fixed md:static inset-x-0 bottom-0 md:w-96 bg-white border-t md:border-l md: flex flex-col transform translate-y-full md:translate-y-0 z-50 max-h-[85vh] md:max-h-none rounded-t-2xl md:rounded-none"
         >
           <div
-            id="edit-banner"
-            class="hidden bg-yellow-50 border-b border-yellow-200 text-yellow-700 text-xs px-3 py-2 flex justify-between items-center"
-          >
-            <span id="edit-banner-text">Editing Order</span>
-            <button onclick="cancelEditBill()" class="underline font-bold">
-              Cancel Edit
-            </button>
-          </div>
-          <div
             class="p-3 border-b bg-gray-50 flex items-center justify-between"
           >
             <div class="flex items-center gap-2 min-w-0">
@@ -297,7 +288,8 @@
               <option value="qr">QR Pay</option>
             </select>
             <button
-              id="processSaleBtn"
+              bg-white
+              text-[]
               onclick="processSale()"
               class="w-full bg-[#008697] text-white py-3 rounded-xl font-bold"
             >
@@ -331,24 +323,14 @@
       class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
     >
       <div class="bg-white w-full max-w-3xl rounded-2xl overflow-hidden">
-        <div
-          class="flex justify-between items-center p-4 border-b flex-wrap gap-2"
-        >
-          <h2 class="font-bold text-lg">Order History</h2>
-          <div class="flex gap-2 items-center">
-            <input
-              type="date"
-              id="history-date"
-              onchange="showOrderHistory(this.value)"
-              class="border rounded-lg px-2 py-1.5 text-sm"
-            />
-            <button
-              onclick="closeHistory()"
-              class="bg-black text-white px-3 py-1 rounded-lg"
-            >
-              Close
-            </button>
-          </div>
+        <div class="flex justify-between items-center p-4 border-b">
+          <h2 class="font-bold text-lg">Today's Orders</h2>
+          <button
+            onclick="closeHistory()"
+            class="bg-black text-white px-3 py-1 rounded-lg"
+          >
+            Close
+          </button>
         </div>
         <div
           id="history-list"
@@ -357,13 +339,25 @@
       </div>
     </div>
 
-    <!-- EDIT CONFIRM MODAL -->
+    <!-- EDIT BILL MODAL -->
     <div
       id="edit-bill-modal"
       class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4"
     >
       <div class="bg-white w-full max-w-sm rounded-2xl p-5">
-        <h2 class="font-bold text-lg mb-4">Confirm Edit</h2>
+        <h2 class="font-bold text-lg mb-4">Edit Payment Method</h2>
+
+        <label class="text-xs text-gray-500 mb-1 block"
+          >New Payment Method</label
+        >
+        <select
+          id="edit-payment-method"
+          class="w-full border rounded-xl px-3 py-2 text-sm mb-4"
+        >
+          <option value="cash">Cash</option>
+          <option value="card">Credit Card</option>
+          <option value="qr">QR Pay</option>
+        </select>
 
         <label class="text-xs text-gray-500 mb-1 block"
           >Staff PIN (to confirm edit)</label
@@ -389,50 +383,6 @@
           </button>
           <button
             onclick="closeEditBillModal()"
-            class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold text-sm"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- DELETE CONFIRM MODAL -->
-    <div
-      id="delete-confirm-modal"
-      class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4"
-    >
-      <div class="bg-white w-full max-w-sm rounded-2xl p-5">
-        <h2 class="font-bold text-lg mb-2 text-red-600">Delete Order</h2>
-        <p class="text-sm text-gray-500 mb-4">
-          This order will be marked as deleted. It stays in history for
-          record, but won't count toward totals or reports.
-        </p>
-
-        <label class="text-xs text-gray-500 mb-1 block"
-          >Staff PIN (to confirm delete)</label
-        >
-        <input
-          id="delete-staff-pin"
-          type="password"
-          maxlength="4"
-          inputmode="numeric"
-          placeholder="Enter your PIN"
-          class="w-full border rounded-xl px-3 py-2 text-sm mb-2"
-        />
-        <p id="delete-bill-error" class="hidden text-red-500 text-xs mb-2">
-          Wrong PIN. Try again.
-        </p>
-
-        <div class="flex gap-2 mt-2">
-          <button
-            onclick="confirmDeleteBill()"
-            class="flex-1 bg-red-600 text-white py-2 rounded-xl font-bold text-sm"
-          >
-            Delete
-          </button>
-          <button
-            onclick="closeDeleteConfirmModal()"
             class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold text-sm"
           >
             Cancel
@@ -637,7 +587,6 @@
               >
                 <option value="pastry">🥐 Pastry</option>
                 <option value="savory">🥪 Savory</option>
-                <option value="loaf">🍞 Loaf</option>
                 <option value="coffee">☕ Coffee</option>
                 <option value="tea">🍵 Tea</option>
                 <option value="matcha">🍵 Matcha</option>

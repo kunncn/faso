@@ -211,17 +211,8 @@ function renderBillPopup(sale) {
     `
       : "";
 
-  const deletedBanner = sale.deleted
-    ? `
-      <div class="bg-red-50 border border-red-200 text-red-600 text-sm md:text-base rounded-xl px-4 py-3 mb-3 font-semibold">
-        This order was deleted by ${sale.deletedBy} · ${sale.deletedAt}
-      </div>
-    `
-    : "";
-
   body.innerHTML = `
     <div class="w-full max-w-3xl">
-      ${deletedBanner}
       <div class="flex justify-between items-baseline border-b border-gray-300 pb-3 mb-1">
         <h2 class="text-xl md:text-2xl font-semibold text-gray-800">Order Receipt</h2>
         <span class="text-sm text-gray-400">${formatTo12Hour(sale.date)}</span>
@@ -609,7 +600,6 @@ function generateSalesReport() {
     const matrix = REPORT_DAY_NAMES.map(() => Array(numWeeks).fill(0));
 
     allSales.forEach((sale) => {
-      if (sale.deleted) return;
       const d = new Date(sale.dateKey + "T00:00:00");
       if (d.getFullYear() !== year || d.getMonth() + 1 !== month) return;
       const dayOfMonth = d.getDate();
@@ -949,11 +939,6 @@ function removeFromCart(index) {
 function processSale() {
   if (cart.length === 0) return alert("Cart is empty!");
 
-  if (editingSaleId !== null) {
-    openEditBillModal();
-    return;
-  }
-
   const paymentMethod = document.getElementById("paymentMethod").value;
   const orderType = document.getElementById("orderType").value;
   const discountRate = parseFloat(
@@ -991,7 +976,6 @@ function processSale() {
       qty: item.qty,
       orderType: item.orderType,
       category: item.category,
-      temp: item.temp || null,
       addons: item.addons || [],
       addonTotal: item.addons
         ? item.addons.reduce((s, a) => s + a.price, 0)
@@ -1053,19 +1037,6 @@ function getTodaySales(callback) {
   };
 }
 
-// same as getTodaySales but for any chosen date (used by the History date picker)
-function getSalesByDate(dateKey, callback) {
-  const tx = db.transaction("sales", "readonly");
-  const store = tx.objectStore("sales");
-  const request = store.getAll();
-
-  request.onsuccess = function () {
-    const all = request.result;
-    const filtered = all.filter((s) => s.dateKey === dateKey);
-    callback(filtered);
-  };
-}
-
 // =====================
 // SUMMARY
 // =====================
@@ -1077,7 +1048,6 @@ function getTodaySummary(callback) {
     let items = {};
 
     sales.forEach((s) => {
-      if (s.deleted) return;
       if (s.payment === "cash") cash += s.total;
       if (s.payment === "card") card += s.total;
       if (s.payment === "qr") qr += s.total;
@@ -1208,39 +1178,33 @@ function renderOrderHistory() {
 // =====================
 // HISTORY MODAL — FULL DETAIL
 // =====================
-function showOrderHistory(dateKey) {
-  const targetDate = dateKey || getTodayKey();
-
-  // keep the date picker in sync with what's being shown
-  const dateInput = document.getElementById("history-date");
-  if (dateInput) dateInput.value = targetDate;
-
-  getSalesByDate(targetDate, (sales) => {
+function showOrderHistory() {
+  getTodaySales((sales) => {
     const history = document.getElementById("history-list");
 
     if (sales.length === 0) {
-      history.innerHTML = `<p class="text-gray-400 text-center py-6">No orders found for ${targetDate}</p>`;
+      history.innerHTML =
+        '<p class="text-gray-400 text-center py-6">No orders today</p>';
       document.getElementById("history-modal").classList.remove("hidden");
       return;
     }
 
-    // Summary totals (deleted orders don't count)
-    const activeSales = sales.filter((s) => !s.deleted);
-    const totalRevenue = activeSales.reduce((s, sale) => s + sale.total, 0);
-    const totalOrders = activeSales.length;
-    const cashTotal = activeSales
+    // Summary totals
+    const totalRevenue = sales.reduce((s, sale) => s + sale.total, 0);
+    const totalOrders = sales.length;
+    const cashTotal = sales
       .filter((s) => s.payment === "cash")
       .reduce((s, sale) => s + sale.total, 0);
-    const cardTotal = activeSales
+    const cardTotal = sales
       .filter((s) => s.payment === "card")
       .reduce((s, sale) => s + sale.total, 0);
-    const qrTotal = activeSales
+    const qrTotal = sales
       .filter((s) => s.payment === "qr")
       .reduce((s, sale) => s + sale.total, 0);
 
     const summaryHTML = `
       <div class="bg-[#e6f2f3] border border-[#99cdd3] rounded-xl p-4 mb-4">
-        <h3 class="font-bold text-[#00707f] mb-2">${targetDate === getTodayKey() ? "Today Summary" : `Summary — ${targetDate}`}</h3>
+        <h3 class="font-bold text-[#00707f] mb-2">Today Summary</h3>
         <div class="grid grid-cols-2 gap-2 text-sm">
           <div>Total Orders: <strong>${totalOrders}</strong></div>
           <div>Revenue: <strong class="text-[#00707f]">RM${totalRevenue.toFixed(2)}</strong></div>
@@ -1251,25 +1215,10 @@ function showOrderHistory(dateKey) {
       </div>
     `;
 
-    const allCount = sales.length;
-
     const ordersHTML = sales
       .slice()
       .reverse()
       .map((sale, idx) => {
-        // deleted orders render as a compact red line instead of a full card
-        if (sale.deleted) {
-          return `
-            <div class="text-xs text-gray-400 py-1">
-              #${allCount - idx} ·
-              <button onclick="openBillFullScreen(${sale.id})"
-                class="text-red-500 underline font-semibold">
-                Deleted Order · RM${sale.total.toFixed(2)} · ${formatTo12Hour(sale.date)}
-              </button>
-            </div>
-          `;
-        }
-
         const discountLabel =
           sale.discountRate > 0
             ? `<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">${(sale.discountRate * 100).toFixed(0)}% OFF</span>`
@@ -1322,7 +1271,7 @@ function showOrderHistory(dateKey) {
             <!-- Header -->
             <div class="flex justify-between items-center p-3 bg-gray-50 border-b">
               <div class="flex items-center gap-2">
-                <span class="text-xs text-gray-400">#${allCount - idx}</span>
+                <span class="text-xs text-gray-400">#${totalOrders - idx}</span>
                 ${taLabel}
                 ${discountLabel}
                 <span class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded uppercase">${sale.payment}</span>
@@ -1358,19 +1307,12 @@ function showOrderHistory(dateKey) {
               ${editedBadge || "<span></span>"}
               <div class="flex gap-2">
                 <button onclick="openBillFullScreen(${sale.id})"
-                  title="Full Screen"
-                  class="bg-[#008697] text-white p-2 rounded-lg">
-                  <i data-lucide="maximize-2" class="w-4 h-4"></i>
+                  class="text-xs bg-[#008697] text-white px-3 py-1.5 rounded-lg font-bold">
+                  Full Screen
                 </button>
-                <button onclick="editBillInCart(${sale.id})"
-                  title="Edit Order"
-                  class="bg-gray-800 text-white p-2 rounded-lg">
-                  <i data-lucide="pencil" class="w-4 h-4"></i>
-                </button>
-                <button onclick="openDeleteConfirmModal(${sale.id})"
-                  title="Delete"
-                  class="bg-red-600 text-white p-2 rounded-lg">
-                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                <button onclick="openEditBillModal(${sale.id})"
+                  class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg font-bold">
+                  Edit Payment
                 </button>
               </div>
             </div>
@@ -1381,7 +1323,6 @@ function showOrderHistory(dateKey) {
 
     history.innerHTML = summaryHTML + ordersHTML;
     document.getElementById("history-modal").classList.remove("hidden");
-    lucide.createIcons();
   });
 }
 
@@ -1404,82 +1345,24 @@ function formatTo12Hour(dateString) {
 // =====================
 // EDIT BILL (change payment + record who edited)
 // =====================
-let editBillSaleId = null; // kept for backward compat, not used by new flow
-let editingSaleId = null; // id of the sale currently loaded into Current Order for editing
-let editingSaleOriginal = null;
+let editBillSaleId = null;
 
-// pull a completed bill's items into the Current Order cart so staff can edit it
-function editBillInCart(saleId) {
-  getSaleById(saleId, (sale) => {
-    if (!sale) return;
-
-    cart = sale.items.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      category: item.category,
-      qty: item.qty,
-      orderType: item.orderType,
-      temp: item.temp || null,
-      addons: item.addons || [],
-    }));
-
-    editingSaleId = sale.id;
-    editingSaleOriginal = sale;
-
-    document.getElementById("discount").value = sale.discountRate || "0";
-    document.getElementById("discountDrinks").checked = false;
-    document.getElementById("paymentMethod").value = sale.payment;
-    document.getElementById("orderType").value = sale.orderType;
-    selectedOrderType = sale.orderType;
-
-    closeHistory();
-    renderCart();
-
-    const banner = document.getElementById("edit-banner");
-    banner.classList.remove("hidden");
-    document.getElementById("edit-banner-text").innerText =
-      `Editing Order · ${formatTo12Hour(sale.date)}`;
-    document.getElementById("processSaleBtn").innerText = "SAVE EDIT";
-
-    if (window.innerWidth < 768) {
-      document
-        .getElementById("cart-panel")
-        .classList.remove("translate-y-full");
-      document.getElementById("cart-panel").classList.add("translate-y-0");
-    }
-  });
-}
-
-// clears the cart and returns the order form to normal "new sale" mode
-function resetOrderForm() {
-  editingSaleId = null;
-  editingSaleOriginal = null;
-  cart = [];
-  renderCart();
-  document.getElementById("edit-banner").classList.add("hidden");
-  document.getElementById("processSaleBtn").innerText = "COMPLETE SALE";
-  document.getElementById("orderType").value = "dinein";
-  selectedOrderType = "dinein";
-  document.getElementById("discount").value = "0";
-  document.getElementById("discountDrinks").checked = false;
-  document.getElementById("paymentMethod").value = "cash";
-}
-
-function cancelEditBill() {
-  resetOrderForm();
-}
-
-// opens the PIN-confirm modal (used both for a fresh sale is not needed here,
-// only for confirming an edit to an existing bill)
-function openEditBillModal() {
+function openEditBillModal(saleId) {
+  editBillSaleId = saleId;
   document.getElementById("edit-staff-pin").value = "";
   document.getElementById("edit-bill-error").classList.add("hidden");
+
+  getSaleById(saleId, (sale) => {
+    if (!sale) return;
+    document.getElementById("edit-payment-method").value = sale.payment;
+  });
+
   document.getElementById("edit-bill-modal").classList.remove("hidden");
 }
 
 function closeEditBillModal() {
   document.getElementById("edit-bill-modal").classList.add("hidden");
+  editBillSaleId = null;
 }
 
 function saveEditBill() {
@@ -1493,115 +1376,17 @@ function saveEditBill() {
     return;
   }
 
-  if (cart.length === 0) {
-    errorEl.innerText = "Order is empty.";
-    errorEl.classList.remove("hidden");
-    return;
-  }
+  const newPayment = document.getElementById("edit-payment-method").value;
 
-  const paymentMethod = document.getElementById("paymentMethod").value;
-  const orderType = document.getElementById("orderType").value;
-  const discountRate = parseFloat(
-    document.getElementById("discount")?.value || 0,
-  );
-  const includeDrinks =
-    document.getElementById("discountDrinks")?.checked || false;
-  const drinkCats = ["coffee", "tea", "matcha", "soda", "chocolate"];
-
-  const sub = cart.reduce((total, item) => {
-    const addonTotal = item.addons
-      ? item.addons.reduce((s, a) => s + a.price, 0)
-      : 0;
-    return total + (item.price + addonTotal) * item.qty;
-  }, 0);
-
-  const discountAmt = cart.reduce((total, item) => {
-    if (item.category === "loaf") return total;
-    if (drinkCats.includes(item.category) && !includeDrinks) return total;
-    const addonTotal = item.addons
-      ? item.addons.reduce((s, a) => s + a.price, 0)
-      : 0;
-    return total + (item.price + addonTotal) * item.qty * discountRate;
-  }, 0);
-
-  const finalTotal = sub - discountAmt;
-
-  getSaleById(editingSaleId, (sale) => {
+  getSaleById(editBillSaleId, (sale) => {
     if (!sale) return;
-
-    sale.items = structuredClone(cart).map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      qty: item.qty,
-      orderType: item.orderType,
-      category: item.category,
-      temp: item.temp || null,
-      addons: item.addons || [],
-      addonTotal: item.addons
-        ? item.addons.reduce((s, a) => s + a.price, 0)
-        : 0,
-      lineTotal:
-        (item.price +
-          (item.addons ? item.addons.reduce((s, a) => s + a.price, 0) : 0)) *
-        item.qty,
-    }));
-    sale.payment = paymentMethod;
-    sale.orderType = orderType;
-    sale.subtotal = sub;
-    sale.discountRate = discountRate;
-    sale.discountAmt = discountAmt;
-    sale.total = finalTotal;
+    sale.payment = newPayment;
     sale.editedBy = staffName;
     sale.editedAt = new Date().toLocaleString();
 
     updateSaleInDB(sale, () => {
       closeEditBillModal();
-      resetOrderForm();
-      renderOrderHistory();
-      showOrderHistory(sale.dateKey); // reopen history on the same date so the "Edited by" badge is visible right away
-    });
-  });
-}
-
-// =====================
-// DELETE ORDER (soft delete — keeps the record for audit, just flags it)
-// =====================
-let deleteBillSaleId = null;
-
-function openDeleteConfirmModal(saleId) {
-  deleteBillSaleId = saleId;
-  document.getElementById("delete-staff-pin").value = "";
-  document.getElementById("delete-bill-error").classList.add("hidden");
-  document.getElementById("delete-confirm-modal").classList.remove("hidden");
-}
-
-function closeDeleteConfirmModal() {
-  document.getElementById("delete-confirm-modal").classList.add("hidden");
-  deleteBillSaleId = null;
-}
-
-function confirmDeleteBill() {
-  const pin = document.getElementById("delete-staff-pin").value.trim();
-  const staffName = STAFF_PINS[pin];
-  const errorEl = document.getElementById("delete-bill-error");
-
-  if (!staffName) {
-    errorEl.innerText = "Wrong PIN. Try again.";
-    errorEl.classList.remove("hidden");
-    return;
-  }
-
-  getSaleById(deleteBillSaleId, (sale) => {
-    if (!sale) return;
-    sale.deleted = true;
-    sale.deletedBy = staffName;
-    sale.deletedAt = new Date().toLocaleString();
-
-    updateSaleInDB(sale, () => {
-      closeDeleteConfirmModal();
-      renderOrderHistory();
-      showOrderHistory(sale.dateKey);
+      showOrderHistory(); // refresh list with updated info
     });
   });
 }

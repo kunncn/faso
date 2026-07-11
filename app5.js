@@ -1053,19 +1053,6 @@ function getTodaySales(callback) {
   };
 }
 
-// same as getTodaySales but for any chosen date (used by the History date picker)
-function getSalesByDate(dateKey, callback) {
-  const tx = db.transaction("sales", "readonly");
-  const store = tx.objectStore("sales");
-  const request = store.getAll();
-
-  request.onsuccess = function () {
-    const all = request.result;
-    const filtered = all.filter((s) => s.dateKey === dateKey);
-    callback(filtered);
-  };
-}
-
 // =====================
 // SUMMARY
 // =====================
@@ -1208,18 +1195,13 @@ function renderOrderHistory() {
 // =====================
 // HISTORY MODAL — FULL DETAIL
 // =====================
-function showOrderHistory(dateKey) {
-  const targetDate = dateKey || getTodayKey();
-
-  // keep the date picker in sync with what's being shown
-  const dateInput = document.getElementById("history-date");
-  if (dateInput) dateInput.value = targetDate;
-
-  getSalesByDate(targetDate, (sales) => {
+function showOrderHistory() {
+  getTodaySales((sales) => {
     const history = document.getElementById("history-list");
 
     if (sales.length === 0) {
-      history.innerHTML = `<p class="text-gray-400 text-center py-6">No orders found for ${targetDate}</p>`;
+      history.innerHTML =
+        '<p class="text-gray-400 text-center py-6">No orders today</p>';
       document.getElementById("history-modal").classList.remove("hidden");
       return;
     }
@@ -1240,7 +1222,7 @@ function showOrderHistory(dateKey) {
 
     const summaryHTML = `
       <div class="bg-[#e6f2f3] border border-[#99cdd3] rounded-xl p-4 mb-4">
-        <h3 class="font-bold text-[#00707f] mb-2">${targetDate === getTodayKey() ? "Today Summary" : `Summary — ${targetDate}`}</h3>
+        <h3 class="font-bold text-[#00707f] mb-2">Today Summary</h3>
         <div class="grid grid-cols-2 gap-2 text-sm">
           <div>Total Orders: <strong>${totalOrders}</strong></div>
           <div>Revenue: <strong class="text-[#00707f]">RM${totalRevenue.toFixed(2)}</strong></div>
@@ -1358,19 +1340,16 @@ function showOrderHistory(dateKey) {
               ${editedBadge || "<span></span>"}
               <div class="flex gap-2">
                 <button onclick="openBillFullScreen(${sale.id})"
-                  title="Full Screen"
-                  class="bg-[#008697] text-white p-2 rounded-lg">
-                  <i data-lucide="maximize-2" class="w-4 h-4"></i>
+                  class="text-xs bg-[#008697] text-white px-3 py-1.5 rounded-lg font-bold">
+                  Full Screen
                 </button>
                 <button onclick="editBillInCart(${sale.id})"
-                  title="Edit Order"
-                  class="bg-gray-800 text-white p-2 rounded-lg">
-                  <i data-lucide="pencil" class="w-4 h-4"></i>
+                  class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-lg font-bold">
+                  Edit Order
                 </button>
                 <button onclick="openDeleteConfirmModal(${sale.id})"
-                  title="Delete"
-                  class="bg-red-600 text-white p-2 rounded-lg">
-                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  class="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg font-bold">
+                  Delete
                 </button>
               </div>
             </div>
@@ -1381,7 +1360,6 @@ function showOrderHistory(dateKey) {
 
     history.innerHTML = summaryHTML + ordersHTML;
     document.getElementById("history-modal").classList.remove("hidden");
-    lucide.createIcons();
   });
 }
 
@@ -1559,7 +1537,7 @@ function saveEditBill() {
       closeEditBillModal();
       resetOrderForm();
       renderOrderHistory();
-      showOrderHistory(sale.dateKey); // reopen history on the same date so the "Edited by" badge is visible right away
+      showOrderHistory(); // reopen history so the "Edited by" badge is visible right away
     });
   });
 }
@@ -1601,7 +1579,7 @@ function confirmDeleteBill() {
     updateSaleInDB(sale, () => {
       closeDeleteConfirmModal();
       renderOrderHistory();
-      showOrderHistory(sale.dateKey);
+      showOrderHistory();
     });
   });
 }
