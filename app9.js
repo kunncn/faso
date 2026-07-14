@@ -437,7 +437,6 @@ function openDB() {
     loadInventory();
     renderOrderHistory();
     cleanupOldSales();
-    checkUpcomingDeletions();
   };
 }
 
@@ -445,7 +444,7 @@ function openDB() {
 function cleanupOldSales() {
   const cutoff = new Date();
   cutoff.setMonth(cutoff.getMonth() - 3);
-  const cutoffKey = toDateKey(cutoff);
+  const cutoffKey = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, "0")}-${String(cutoff.getDate()).padStart(2, "0")}`;
 
   const tx = db.transaction("sales", "readwrite");
   const store = tx.objectStore("sales");
@@ -455,44 +454,6 @@ function cleanupOldSales() {
       if (sale.dateKey < cutoffKey) store.delete(sale.id);
     });
   };
-}
-
-// small helper: Date object -> "YYYY-MM-DD" string matching sale.dateKey format
-function toDateKey(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-// warns 1 week before the 3-month auto-cleanup would delete a record,
-// so staff have a chance to export it first
-function checkUpcomingDeletions() {
-  const cutoff = new Date();
-  cutoff.setMonth(cutoff.getMonth() - 3);
-  const cutoffKey = toDateKey(cutoff);
-
-  const warnBoundary = new Date(cutoff);
-  warnBoundary.setDate(warnBoundary.getDate() + 7);
-  const warnBoundaryKey = toDateKey(warnBoundary);
-
-  getAllSales((allSales) => {
-    const upcoming = allSales.filter(
-      (s) =>
-        !s.deleted && s.dateKey > cutoffKey && s.dateKey <= warnBoundaryKey,
-    );
-    if (upcoming.length === 0) return;
-
-    const dates = upcoming.map((s) => s.dateKey).sort();
-    const earliest = dates[0];
-    const latest = dates[dates.length - 1];
-
-    document.getElementById("data-warning-text").innerText =
-      `${upcoming.length} order(s) from ${earliest}${earliest !== latest ? " to " + latest : ""} will be permanently deleted within 7 days (3-month auto-cleanup). Export your Sales Report now if you need this data.`;
-
-    document.getElementById("data-warning-modal").classList.remove("hidden");
-  });
-}
-
-function closeDataWarning() {
-  document.getElementById("data-warning-modal").classList.add("hidden");
 }
 
 openDB();
