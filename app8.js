@@ -26,8 +26,8 @@ const categoryEmoji = {
 // STAFF PINS (for bill edit authorization)
 // =====================
 const STAFF_PINS = {
-  3009: "Ko Ko",
-  1234: "John",
+  "3009": "Ko Ko",
+  "1234": "John",
 };
 
 // =====================
@@ -263,6 +263,7 @@ function showThankYouPopup(total) {
   setTimeout(() => renderCustomerPopup(), 4000);
 }
 
+
 function resetDB() {
   if (!confirm("Reset all inventory data?")) return;
   const tx = db.transaction("inventory", "readwrite");
@@ -361,11 +362,11 @@ function renderAddonList() {
     tempHTML = `
       <div class="flex gap-2 mb-3">
         <button id="btn-hot" onclick="selectTemp('hot')"
-          class="flex-1 py-2 rounded-xl border-2 font-bold text-sm ${selectedTemp === "hot" ? "border-[#008697] bg-[#e6f2f3] text-[#00707f]" : "border-gray-200 text-gray-400"}">
+          class="flex-1 py-2 rounded-xl border-2 font-bold text-sm ${selectedTemp ==="hot" ? "border-[#008697] bg-[#e6f2f3] text-[#00707f]" : "border-gray-200 text-gray-400"}">
           🔥 Hot — RM${selectedProduct.price.toFixed(2)}
         </button>
         <button id="btn-ice" onclick="selectTemp('ice')"
-          class="flex-1 py-2 rounded-xl border-2 font-bold text-sm ${selectedTemp === "ice" ? "border-blue-500 bg-blue-50 text-blue-600" : "border-gray-200 text-gray-400"}">
+          class="flex-1 py-2 rounded-xl border-2 font-bold text-sm ${selectedTemp ==="ice" ? "border-blue-500 bg-blue-50 text-blue-600" : "border-gray-200 text-gray-400"}">
           🧊 Ice — RM${selectedProduct.priceIce.toFixed(2)}
         </button>
       </div>
@@ -570,8 +571,6 @@ function getAllSales(callback) {
 // SALES REPORT (weekly/daily comparison + charts + Excel export)
 // =====================
 let currentReportData = null;
-let currentBestSellersByQty = [];
-let currentBestSellersByRevenue = [];
 let reportChartWeek = null;
 let reportChartDay = null;
 const REPORT_DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -607,11 +606,7 @@ function renderBestSellers() {
       if (sale.deleted) return;
       sale.items.forEach((item) => {
         if (!itemStats[item.name]) {
-          itemStats[item.name] = {
-            category: item.category,
-            qty: 0,
-            revenue: 0,
-          };
+          itemStats[item.name] = { category: item.category, qty: 0, revenue: 0 };
         }
         itemStats[item.name].qty += item.qty;
         itemStats[item.name].revenue += item.lineTotal;
@@ -639,9 +634,6 @@ function renderBestSellers() {
     const byRevenue = [...itemsArr]
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 10);
-
-    currentBestSellersByQty = byQty;
-    currentBestSellersByRevenue = byRevenue;
 
     const buildRows = (list, valueKey, formatFn) =>
       list
@@ -705,7 +697,8 @@ function generateSalesReport() {
     const firstDayMonWeekday =
       firstDayJsWeekday === 0 ? 6 : firstDayJsWeekday - 1; // Mon=0..Sun=6
 
-    const numWeeks = Math.floor((daysInMonth - 1 + firstDayMonWeekday) / 7) + 1;
+    const numWeeks =
+      Math.floor((daysInMonth - 1 + firstDayMonWeekday) / 7) + 1;
     // matrix[dayIdx 0=Mon..6=Sun][weekIdx 0-based] = total sales
     const matrix = REPORT_DAY_NAMES.map(() => Array(numWeeks).fill(0));
 
@@ -759,7 +752,7 @@ function renderSalesReport() {
     for (let w = 0; w < numWeeks; w++) {
       const v = matrix[i][w];
       const isMax = v > 0 && v === maxPerWeek[w];
-      cells += `<td class="border px-3 py-2 text-sm text-right ${isMax ? "bg-yellow-200 font-bold" : ""}">${v > 0 ? v.toFixed(2) : ""}</td>`;
+      cells += `<td class="border px-3 py-2 text-sm text-right ${isMax ?"bg-yellow-200 font-bold" : ""}">${v > 0 ? v.toFixed(2) : ""}</td>`;
     }
     rows += `<tr><td class="border px-3 py-2 text-sm font-semibold bg-gray-50">${day}</td>${cells}</tr>`;
   });
@@ -801,10 +794,7 @@ function renderSalesReport() {
 
 function drawReportCharts() {
   const { numWeeks, matrix } = currentReportData;
-  const weekLabels = Array.from(
-    { length: numWeeks },
-    (_, i) => `Week ${i + 1}`,
-  );
+  const weekLabels = Array.from({ length: numWeeks }, (_, i) => `Week ${i + 1}`);
 
   const byWeekDatasets = REPORT_DAY_NAMES.map((day, i) => ({
     label: day,
@@ -855,206 +845,22 @@ function exportSalesReport() {
   );
   const avgPerDay = daysWithSales > 0 ? totalSales / daysWithSales : 0;
 
-  const weekHeaders = Array.from(
-    { length: numWeeks },
-    (_, i) => `Week ${i + 1}`,
-  );
-  const rows = [["Day", ...weekHeaders, "", "Total Sales", "Average per day"]];
+  const weekHeaders = Array.from({ length: numWeeks }, (_, i) => `Week ${i + 1}`);
+  const rows = [
+    ["Day", ...weekHeaders, "", "Total Sales", "Average per day"],
+  ];
 
   REPORT_DAY_NAMES.forEach((day, i) => {
     const rowVals = matrix[i].map((v) => (v > 0 ? Number(v.toFixed(2)) : ""));
-    const extra =
-      i === 0
-        ? ["", Number(totalSales.toFixed(2)), Number(avgPerDay.toFixed(2))]
-        : ["", "", ""];
+    const extra = i === 0 ? ["", Number(totalSales.toFixed(2)), Number(avgPerDay.toFixed(2))] : ["", "", ""];
     rows.push([day, ...rowVals, ...extra]);
   });
 
   const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws["!cols"] = [
-    { wch: 8 },
-    ...weekHeaders.map(() => ({ wch: 10 })),
-    { wch: 2 },
-    { wch: 14 },
-    { wch: 16 },
-  ];
+  ws["!cols"] = [{ wch: 8 }, ...weekHeaders.map(() => ({ wch: 10 })), { wch: 2 }, { wch: 14 }, { wch: 16 }];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
-  XLSX.writeFile(
-    wb,
-    `faso-sales-report-${year}-${String(month).padStart(2, "0")}.xlsx`,
-  );
-}
-
-// =====================
-// PDF EXPORT — full print-ready report (table + charts + best sellers)
-// =====================
-function exportSalesReportPDF() {
-  if (!currentReportData) return;
-  const { year, month, numWeeks, matrix } = currentReportData;
-
-  let totalSales = 0;
-  let daysWithSales = 0;
-  matrix.forEach((row) =>
-    row.forEach((v) => {
-      if (v > 0) {
-        totalSales += v;
-        daysWithSales++;
-      }
-    }),
-  );
-  const avgPerDay = daysWithSales > 0 ? totalSales / daysWithSales : 0;
-
-  const maxPerWeek = [];
-  for (let w = 0; w < numWeeks; w++) {
-    let max = 0;
-    for (let i = 0; i < 7; i++) if (matrix[i][w] > max) max = matrix[i][w];
-    maxPerWeek.push(max);
-  }
-
-  const monthLabel = new Date(year, month - 1, 1).toLocaleString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF("p", "mm", "a4");
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 14;
-
-  // ---- Header ----
-  doc.setFontSize(18);
-  doc.setTextColor(0, 134, 151);
-  doc.text("FASO PASTRY", margin, 18);
-  doc.setFontSize(12);
-  doc.setTextColor(90, 90, 90);
-  doc.text(`Sales Report — ${monthLabel}`, margin, 26);
-
-  // ---- Weekly comparison table ----
-  const weekHeaders = Array.from(
-    { length: numWeeks },
-    (_, i) => `Week ${i + 1}`,
-  );
-  const tableBody = REPORT_DAY_NAMES.map((day, i) => [
-    day,
-    ...matrix[i].map((v) => (v > 0 ? `RM${v.toFixed(2)}` : "")),
-  ]);
-
-  doc.autoTable({
-    startY: 32,
-    margin: { left: margin, right: margin },
-    head: [["Day", ...weekHeaders]],
-    body: tableBody,
-    theme: "grid",
-    headStyles: { fillColor: [0, 134, 151], textColor: 255, fontStyle: "bold" },
-    styles: { fontSize: 9, halign: "right", cellPadding: 3 },
-    columnStyles: { 0: { halign: "left", fontStyle: "bold" } },
-    didParseCell: (data) => {
-      if (data.section === "body" && data.column.index > 0) {
-        const w = data.column.index - 1;
-        const val = matrix[data.row.index][w];
-        if (val > 0 && val === maxPerWeek[w]) {
-          data.cell.styles.fillColor = [255, 243, 176];
-          data.cell.styles.fontStyle = "bold";
-        }
-      }
-    },
-  });
-
-  let y = doc.lastAutoTable.finalY + 8;
-  doc.setFontSize(11);
-  doc.setTextColor(0, 0, 0);
-  doc.text(`Total Sales: RM${totalSales.toFixed(2)}`, margin, y);
-  doc.text(
-    `Average per day: RM${avgPerDay.toFixed(2)}`,
-    pageWidth - margin,
-    y,
-    {
-      align: "right",
-    },
-  );
-  y += 10;
-
-  // ---- Charts (captured from the on-screen canvases) ----
-  const addChartImage = (canvasId, title) => {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    const imgWidth = pageWidth - margin * 2;
-    const imgHeight = imgWidth * (canvas.height / canvas.width);
-
-    if (y + imgHeight + 12 > pageHeight - margin) {
-      doc.addPage();
-      y = margin;
-    }
-
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    doc.text(title, margin, y);
-    y += 4;
-    doc.addImage(
-      canvas.toDataURL("image/png", 1.0),
-      "PNG",
-      margin,
-      y,
-      imgWidth,
-      imgHeight,
-    );
-    y += imgHeight + 10;
-  };
-
-  addChartImage("chart-by-week", "Comparison by Week");
-  addChartImage("chart-by-day", "Comparison by Day");
-
-  // ---- Best Selling Items ----
-  doc.addPage();
-  y = margin;
-  doc.setFontSize(16);
-  doc.setTextColor(0, 134, 151);
-  doc.text("Best Selling Items", margin, y);
-  y += 8;
-
-  doc.setFontSize(11);
-  doc.setTextColor(0, 0, 0);
-  doc.text("Top 10 — Most Sold (Qty)", margin, y);
-  doc.autoTable({
-    startY: y + 3,
-    margin: { left: margin, right: margin },
-    head: [["#", "Item", "Qty Sold"]],
-    body: currentBestSellersByQty.map((item, idx) => [
-      idx + 1,
-      item.name,
-      item.qty,
-    ]),
-    theme: "grid",
-    headStyles: { fillColor: [0, 134, 151], textColor: 255, fontStyle: "bold" },
-    styles: { fontSize: 9, cellPadding: 3 },
-    columnStyles: { 2: { halign: "right" } },
-  });
-
-  y = doc.lastAutoTable.finalY + 10;
-  if (y > pageHeight - 60) {
-    doc.addPage();
-    y = margin;
-  }
-  doc.setFontSize(11);
-  doc.text("Top 10 — Most Revenue", margin, y);
-  doc.autoTable({
-    startY: y + 3,
-    margin: { left: margin, right: margin },
-    head: [["#", "Item", "Revenue"]],
-    body: currentBestSellersByRevenue.map((item, idx) => [
-      idx + 1,
-      item.name,
-      `RM${item.revenue.toFixed(2)}`,
-    ]),
-    theme: "grid",
-    headStyles: { fillColor: [0, 134, 151], textColor: 255, fontStyle: "bold" },
-    styles: { fontSize: 9, cellPadding: 3 },
-    columnStyles: { 2: { halign: "right" } },
-  });
-
-  doc.save(`faso-sales-report-${year}-${String(month).padStart(2, "0")}.pdf`);
+  XLSX.writeFile(wb, `faso-sales-report-${year}-${String(month).padStart(2, "0")}.xlsx`);
 }
 
 // =====================
@@ -1627,7 +1433,7 @@ function showOrderHistory(dateKey) {
 
             <!-- Edit bill row -->
             <div class="px-3 pb-3 flex items-center justify-between gap-2 flex-wrap">
-              ${editedBadge || "<span></span>"}
+              ${editedBadge || '<span></span>'}
               <div class="flex gap-2">
                 <button onclick="openBillFullScreen(${sale.id})"
                   title="Full Screen"
@@ -1715,9 +1521,7 @@ function editBillInCart(saleId) {
     document.getElementById("processSaleBtn").innerText = "SAVE EDIT";
 
     if (window.innerWidth < 768) {
-      document
-        .getElementById("cart-panel")
-        .classList.remove("translate-y-full");
+      document.getElementById("cart-panel").classList.remove("translate-y-full");
       document.getElementById("cart-panel").classList.add("translate-y-0");
     }
   });
