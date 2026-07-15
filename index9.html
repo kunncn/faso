@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <link rel="stylesheet" href="style.css" />
@@ -405,8 +406,8 @@
       <div class="bg-white w-full max-w-sm rounded-2xl p-5">
         <h2 class="font-bold text-lg mb-2 text-red-600">Delete Order</h2>
         <p class="text-sm text-gray-500 mb-4">
-          This order will be marked as deleted. It stays in history for record,
-          but won't count toward totals or reports.
+          This order will be marked as deleted. It stays in history for
+          record, but won't count toward totals or reports.
         </p>
 
         <label class="text-xs text-gray-500 mb-1 block"
@@ -441,6 +442,36 @@
       </div>
     </div>
 
+    <!-- DATA DELETION WARNING MODAL -->
+    <div
+      id="data-warning-modal"
+      class="hidden fixed inset-0 bg-black/50 z-[70] flex items-center justify-center p-4"
+    >
+      <div class="bg-white w-full max-w-sm rounded-2xl p-5">
+        <h2 class="font-bold text-lg mb-2 text-yellow-600">
+          ⚠ Old Records Expiring Soon
+        </h2>
+        <p id="data-warning-text" class="text-sm text-gray-600 mb-4">
+          Some sales records will be permanently deleted within 7 days
+          (3-month auto-cleanup).
+        </p>
+        <div class="flex gap-2 mt-2">
+          <button
+            onclick="closeDataWarning(); openSalesReport();"
+            class="flex-1 bg-[#008697] text-white py-2 rounded-xl font-bold text-sm"
+          >
+            Export Now
+          </button>
+          <button
+            onclick="closeDataWarning()"
+            class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold text-sm"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- SALES REPORT MODAL -->
     <div
       id="report-modal"
@@ -470,6 +501,12 @@
               class="bg-black text-white px-3 py-1.5 rounded-lg text-sm font-bold"
             >
               Export Excel
+            </button>
+            <button
+              onclick="exportSalesReportPDF()"
+              class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold"
+            >
+              Export PDF
             </button>
             <button
               onclick="closeSalesReport()"

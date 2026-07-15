@@ -437,6 +437,7 @@ function openDB() {
     loadInventory();
     renderOrderHistory();
     cleanupOldSales();
+    checkUpcomingDeletions();
   };
 }
 
@@ -444,7 +445,7 @@ function openDB() {
 function cleanupOldSales() {
   const cutoff = new Date();
   cutoff.setMonth(cutoff.getMonth() - 3);
-  const cutoffKey = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, "0")}-${String(cutoff.getDate()).padStart(2, "0")}`;
+  const cutoffKey = toDateKey(cutoff);
 
   const tx = db.transaction("sales", "readwrite");
   const store = tx.objectStore("sales");
@@ -454,6 +455,44 @@ function cleanupOldSales() {
       if (sale.dateKey < cutoffKey) store.delete(sale.id);
     });
   };
+}
+
+// small helper: Date object -> "YYYY-MM-DD" string matching sale.dateKey format
+function toDateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// warns 1 week before the 3-month auto-cleanup would delete a record,
+// so staff have a chance to export it first
+function checkUpcomingDeletions() {
+  const cutoff = new Date();
+  cutoff.setMonth(cutoff.getMonth() - 3);
+  const cutoffKey = toDateKey(cutoff);
+
+  const warnBoundary = new Date(cutoff);
+  warnBoundary.setDate(warnBoundary.getDate() + 7);
+  const warnBoundaryKey = toDateKey(warnBoundary);
+
+  getAllSales((allSales) => {
+    const upcoming = allSales.filter(
+      (s) =>
+        !s.deleted && s.dateKey > cutoffKey && s.dateKey <= warnBoundaryKey,
+    );
+    if (upcoming.length === 0) return;
+
+    const dates = upcoming.map((s) => s.dateKey).sort();
+    const earliest = dates[0];
+    const latest = dates[dates.length - 1];
+
+    document.getElementById("data-warning-text").innerText =
+      `${upcoming.length} order(s) from ${earliest}${earliest !== latest ? " to " + latest : ""} will be permanently deleted within 7 days (3-month auto-cleanup). Export your Sales Report now if you need this data.`;
+
+    document.getElementById("data-warning-modal").classList.remove("hidden");
+  });
+}
+
+function closeDataWarning() {
+  document.getElementById("data-warning-modal").classList.add("hidden");
 }
 
 openDB();
@@ -570,6 +609,8 @@ function getAllSales(callback) {
 // SALES REPORT (weekly/daily comparison + charts + Excel export)
 // =====================
 let currentReportData = null;
+let currentBestSellersByQty = [];
+let currentBestSellersByRevenue = [];
 let reportChartWeek = null;
 let reportChartDay = null;
 const REPORT_DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -638,6 +679,9 @@ function renderBestSellers() {
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 10);
 
+    currentBestSellersByQty = byQty;
+    currentBestSellersByRevenue = byRevenue;
+
     const buildRows = (list, valueKey, formatFn) =>
       list
         .map(
@@ -693,7 +737,14 @@ function generateSalesReport() {
 
   getAllSales((allSales) => {
     const daysInMonth = new Date(year, month, 0).getDate();
-    const numWeeks = Math.ceil(daysInMonth / 7);
+
+    // align week buckets to real Monday–Sunday calendar weeks, not raw day/7
+    const firstOfMonth = new Date(year, month - 1, 1);
+    const firstDayJsWeekday = firstOfMonth.getDay(); // 0=Sun..6=Sat
+    const firstDayMonWeekday =
+      firstDayJsWeekday === 0 ? 6 : firstDayJsWeekday - 1; // Mon=0..Sun=6
+
+    const numWeeks = Math.floor((daysInMonth - 1 + firstDayMonWeekday) / 7) + 1;
     // matrix[dayIdx 0=Mon..6=Sun][weekIdx 0-based] = total sales
     const matrix = REPORT_DAY_NAMES.map(() => Array(numWeeks).fill(0));
 
@@ -702,7 +753,7 @@ function generateSalesReport() {
       const d = new Date(sale.dateKey + "T00:00:00");
       if (d.getFullYear() !== year || d.getMonth() + 1 !== month) return;
       const dayOfMonth = d.getDate();
-      const weekIdx = Math.ceil(dayOfMonth / 7) - 1;
+      const weekIdx = Math.floor((dayOfMonth - 1 + firstDayMonWeekday) / 7);
       const jsDay = d.getDay(); // 0=Sun..6=Sat
       const dayIdx = jsDay === 0 ? 6 : jsDay - 1; // convert to Mon=0..Sun=6
       matrix[dayIdx][weekIdx] += sale.total;
@@ -872,6 +923,177 @@ function exportSalesReport() {
     wb,
     `faso-sales-report-${year}-${String(month).padStart(2, "0")}.xlsx`,
   );
+}
+
+// =====================
+// PDF EXPORT — full print-ready report (table + charts + best sellers)
+// =====================
+function exportSalesReportPDF() {
+  if (!currentReportData) return;
+  const { year, month, numWeeks, matrix } = currentReportData;
+
+  let totalSales = 0;
+  let daysWithSales = 0;
+  matrix.forEach((row) =>
+    row.forEach((v) => {
+      if (v > 0) {
+        totalSales += v;
+        daysWithSales++;
+      }
+    }),
+  );
+  const avgPerDay = daysWithSales > 0 ? totalSales / daysWithSales : 0;
+
+  const maxPerWeek = [];
+  for (let w = 0; w < numWeeks; w++) {
+    let max = 0;
+    for (let i = 0; i < 7; i++) if (matrix[i][w] > max) max = matrix[i][w];
+    maxPerWeek.push(max);
+  }
+
+  const monthLabel = new Date(year, month - 1, 1).toLocaleString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 14;
+
+  // ---- Header ----
+  doc.setFontSize(18);
+  doc.setTextColor(0, 134, 151);
+  doc.text("FASO PASTRY", margin, 18);
+  doc.setFontSize(12);
+  doc.setTextColor(90, 90, 90);
+  doc.text(`Sales Report — ${monthLabel}`, margin, 26);
+
+  // ---- Weekly comparison table ----
+  const weekHeaders = Array.from(
+    { length: numWeeks },
+    (_, i) => `Week ${i + 1}`,
+  );
+  const tableBody = REPORT_DAY_NAMES.map((day, i) => [
+    day,
+    ...matrix[i].map((v) => (v > 0 ? `RM${v.toFixed(2)}` : "")),
+  ]);
+
+  doc.autoTable({
+    startY: 32,
+    margin: { left: margin, right: margin },
+    head: [["Day", ...weekHeaders]],
+    body: tableBody,
+    theme: "grid",
+    headStyles: { fillColor: [0, 134, 151], textColor: 255, fontStyle: "bold" },
+    styles: { fontSize: 9, halign: "right", cellPadding: 3 },
+    columnStyles: { 0: { halign: "left", fontStyle: "bold" } },
+    didParseCell: (data) => {
+      if (data.section === "body" && data.column.index > 0) {
+        const w = data.column.index - 1;
+        const val = matrix[data.row.index][w];
+        if (val > 0 && val === maxPerWeek[w]) {
+          data.cell.styles.fillColor = [255, 243, 176];
+          data.cell.styles.fontStyle = "bold";
+        }
+      }
+    },
+  });
+
+  let y = doc.lastAutoTable.finalY + 8;
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`Total Sales: RM${totalSales.toFixed(2)}`, margin, y);
+  doc.text(
+    `Average per day: RM${avgPerDay.toFixed(2)}`,
+    pageWidth - margin,
+    y,
+    {
+      align: "right",
+    },
+  );
+  y += 10;
+
+  // ---- Charts (captured from the on-screen canvases) ----
+  const addChartImage = (canvasId, title) => {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const imgWidth = pageWidth - margin * 2;
+    const imgHeight = imgWidth * (canvas.height / canvas.width);
+
+    if (y + imgHeight + 12 > pageHeight - margin) {
+      doc.addPage();
+      y = margin;
+    }
+
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(title, margin, y);
+    y += 4;
+    doc.addImage(
+      canvas.toDataURL("image/png", 1.0),
+      "PNG",
+      margin,
+      y,
+      imgWidth,
+      imgHeight,
+    );
+    y += imgHeight + 10;
+  };
+
+  addChartImage("chart-by-week", "Comparison by Week");
+  addChartImage("chart-by-day", "Comparison by Day");
+
+  // ---- Best Selling Items ----
+  doc.addPage();
+  y = margin;
+  doc.setFontSize(16);
+  doc.setTextColor(0, 134, 151);
+  doc.text("Best Selling Items", margin, y);
+  y += 8;
+
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Top 10 — Most Sold (Qty)", margin, y);
+  doc.autoTable({
+    startY: y + 3,
+    margin: { left: margin, right: margin },
+    head: [["#", "Item", "Qty Sold"]],
+    body: currentBestSellersByQty.map((item, idx) => [
+      idx + 1,
+      item.name,
+      item.qty,
+    ]),
+    theme: "grid",
+    headStyles: { fillColor: [0, 134, 151], textColor: 255, fontStyle: "bold" },
+    styles: { fontSize: 9, cellPadding: 3 },
+    columnStyles: { 2: { halign: "right" } },
+  });
+
+  y = doc.lastAutoTable.finalY + 10;
+  if (y > pageHeight - 60) {
+    doc.addPage();
+    y = margin;
+  }
+  doc.setFontSize(11);
+  doc.text("Top 10 — Most Revenue", margin, y);
+  doc.autoTable({
+    startY: y + 3,
+    margin: { left: margin, right: margin },
+    head: [["#", "Item", "Revenue"]],
+    body: currentBestSellersByRevenue.map((item, idx) => [
+      idx + 1,
+      item.name,
+      `RM${item.revenue.toFixed(2)}`,
+    ]),
+    theme: "grid",
+    headStyles: { fillColor: [0, 134, 151], textColor: 255, fontStyle: "bold" },
+    styles: { fontSize: 9, cellPadding: 3 },
+    columnStyles: { 2: { halign: "right" } },
+  });
+
+  doc.save(`faso-sales-report-${year}-${String(month).padStart(2, "0")}.pdf`);
 }
 
 // =====================

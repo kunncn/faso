@@ -134,8 +134,18 @@ function renderCustomerPopup() {
     `
       : "";
 
+  const orderNoteVal = document.getElementById("orderNote")?.value.trim() || "";
+  const noteBlock = orderNoteVal
+    ? `
+      <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm md:text-base rounded-xl px-4 py-2 mb-3">
+        📝 ${orderNoteVal}
+      </div>
+    `
+    : "";
+
   body.innerHTML = `
     <div class="w-full max-w-3xl">
+      ${noteBlock}
       <div class="flex justify-between items-baseline border-b border-gray-300 pb-3 mb-1">
         <h2 class="text-xl md:text-2xl font-semibold text-gray-800">Your Order</h2>
         <span class="text-sm text-gray-400">${cart.reduce((t, i) => t + i.qty, 0)} item${cart.reduce((t, i) => t + i.qty, 0) > 1 ? "s" : ""}</span>
@@ -219,9 +229,18 @@ function renderBillPopup(sale) {
     `
     : "";
 
+  const noteBanner = sale.note
+    ? `
+      <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 text-sm md:text-base rounded-xl px-4 py-2 mb-3">
+        📝 ${sale.note}
+      </div>
+    `
+    : "";
+
   body.innerHTML = `
     <div class="w-full max-w-3xl">
       ${deletedBanner}
+      ${noteBanner}
       <div class="flex justify-between items-baseline border-b border-gray-300 pb-3 mb-1">
         <h2 class="text-xl md:text-2xl font-semibold text-gray-800">Order Receipt</h2>
         <span class="text-sm text-gray-400">${formatTo12Hour(sale.date)}</span>
@@ -634,11 +653,18 @@ function openSalesReport() {
   generateSalesReport();
   renderBestSellers();
 }
+function resetBestSellersRange() {
+  document.getElementById("bestsellers-count").value = "10";
+  renderBestSellers();
+}
 
 // =====================
 // BEST SELLERS (all sales currently kept — up to 3 months)
 // =====================
 function renderBestSellers() {
+  const topN =
+    parseInt(document.getElementById("bestsellers-count")?.value, 10) || 10;
+
   getAllSales((allSales) => {
     const itemStats = {}; // item name -> { category, qty, revenue }
 
@@ -668,16 +694,15 @@ function renderBestSellers() {
 
     if (itemsArr.length === 0) {
       container.innerHTML = `
-        <h3 class="font-bold text-gray-700 mb-3">Best Selling Items</h3>
-        <p class="text-gray-400 text-center py-6">No sales data yet.</p>
+        <p class="text-gray-400 text-center py-6">No sales data in this range.</p>
       `;
       return;
     }
 
-    const byQty = [...itemsArr].sort((a, b) => b.qty - a.qty).slice(0, 10);
+    const byQty = [...itemsArr].sort((a, b) => b.qty - a.qty).slice(0, topN);
     const byRevenue = [...itemsArr]
       .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 10);
+      .slice(0, topN);
 
     currentBestSellersByQty = byQty;
     currentBestSellersByRevenue = byRevenue;
@@ -711,14 +736,13 @@ function renderBestSellers() {
     `;
 
     container.innerHTML = `
-      <h3 class="font-bold text-gray-700 mb-3">Best Selling Items</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="border rounded-xl p-3">
-          <h4 class="font-bold text-gray-700 mb-2 text-sm">Top 10 — Most Sold (Qty)</h4>
+          <h4 class="font-bold text-gray-700 mb-2 text-sm">Top ${topN} — Most Sold (Qty)</h4>
           ${buildTable(byQty, "qty", "Qty Sold", (v) => v)}
         </div>
         <div class="border rounded-xl p-3">
-          <h4 class="font-bold text-gray-700 mb-2 text-sm">Top 10 — Most Revenue</h4>
+          <h4 class="font-bold text-gray-700 mb-2 text-sm">Top ${topN} — Most Revenue</h4>
           ${buildTable(byRevenue, "revenue", "Revenue", (v) => `RM${v.toFixed(2)}`)}
         </div>
       </div>
@@ -1055,7 +1079,11 @@ function exportSalesReportPDF() {
 
   doc.setFontSize(11);
   doc.setTextColor(0, 0, 0);
-  doc.text("Top 10 — Most Sold (Qty)", margin, y);
+  doc.text(
+    `Top ${currentBestSellersByQty.length} — Most Sold (Qty)`,
+    margin,
+    y,
+  );
   doc.autoTable({
     startY: y + 3,
     margin: { left: margin, right: margin },
@@ -1077,7 +1105,11 @@ function exportSalesReportPDF() {
     y = margin;
   }
   doc.setFontSize(11);
-  doc.text("Top 10 — Most Revenue", margin, y);
+  doc.text(
+    `Top ${currentBestSellersByRevenue.length} — Most Revenue`,
+    margin,
+    y,
+  );
   doc.autoTable({
     startY: y + 3,
     margin: { left: margin, right: margin },
@@ -1319,6 +1351,7 @@ function processSale() {
     discountAmt,
     total: finalTotal,
     date: new Date().toLocaleString(),
+    note: document.getElementById("orderNote")?.value.trim() || "",
     editedBy: null,
     editedAt: null,
   };
@@ -1340,6 +1373,8 @@ function processSale() {
   document.getElementById("discountDrinks").checked = false;
 
   document.getElementById("paymentMethod").value = "cash";
+
+  document.getElementById("orderNote").value = "";
 
   if (window.innerWidth < 768) {
     document.getElementById("cart-panel").classList.add("translate-y-full");
@@ -1628,6 +1663,10 @@ function showOrderHistory(dateKey) {
           ? `<div class="text-[11px] text-gray-400 mt-1">✎ Edited by <strong>${sale.editedBy}</strong> · ${sale.editedAt}</div>`
           : "";
 
+        const noteBadge = sale.note
+          ? `<div class="text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg px-2 py-1 mt-1">📝 ${sale.note}</div>`
+          : "";
+
         return `
           <div class="border rounded-xl overflow-hidden mb-3">
             <!-- Header -->
@@ -1643,6 +1682,7 @@ function showOrderHistory(dateKey) {
 
             <!-- Items -->
             <div class="px-3 pt-2 pb-1">${itemsHTML}</div>
+            ${noteBadge ? `<div class="px-3">${noteBadge}</div>` : ""}
 
             <!-- Totals -->
             <div class="px-3 pb-2 pt-1 space-y-1 text-sm">
@@ -1742,6 +1782,7 @@ function editBillInCart(saleId) {
     document.getElementById("discountDrinks").checked = false;
     document.getElementById("paymentMethod").value = sale.payment;
     document.getElementById("orderType").value = sale.orderType;
+    document.getElementById("orderNote").value = sale.note || "";
     selectedOrderType = sale.orderType;
 
     closeHistory();
@@ -1775,6 +1816,7 @@ function resetOrderForm() {
   document.getElementById("discount").value = "0";
   document.getElementById("discountDrinks").checked = false;
   document.getElementById("paymentMethod").value = "cash";
+  document.getElementById("orderNote").value = "";
 }
 
 function cancelEditBill() {
@@ -1863,6 +1905,7 @@ function saveEditBill() {
     sale.discountRate = discountRate;
     sale.discountAmt = discountAmt;
     sale.total = finalTotal;
+    sale.note = document.getElementById("orderNote")?.value.trim() || "";
     sale.editedBy = staffName;
     sale.editedAt = new Date().toLocaleString();
 

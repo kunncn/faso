@@ -228,7 +228,7 @@
             </div>
             <button
               onclick="toggleCart()"
-              class="md:hidden text-xs bg-black text-white px-2 py-1 rounded-lg shrink-0"
+              class="md:hidden text-xs bg-[#008697] text-white px-2 py-1 rounded-lg shrink-0"
             >
               ✕
             </button>
@@ -284,6 +284,16 @@
                 >
               </label>
 
+              <!-- Row 2b: Order note -->
+              <div>
+                <input
+                  id="orderNote"
+                  type="text"
+                  placeholder="Add a note for this order..."
+                  class="w-full p-2 border rounded-lg mt-1 text-sm"
+                />
+              </div>
+
               <!-- Row 3: Total -->
               <div class="flex justify-between items-center pt-1">
                 <span class="font-bold text-gray-400">Total</span>
@@ -319,7 +329,7 @@
         <p class="text-gray-500 mt-2">Receipt generated</p>
         <button
           onclick="closeModal()"
-          class="mt-5 bg-gray-800 text-white px-6 py-2 rounded-lg"
+          class="mt-5 bg-[#008697] text-white px-6 py-2 rounded-lg"
         >
           Done
         </button>
@@ -345,7 +355,7 @@
             />
             <button
               onclick="closeHistory()"
-              class="bg-black text-white px-3 py-1 rounded-lg"
+              class="bg-[#008697] text-white px-3 py-1 rounded-lg"
             >
               Close
             </button>
@@ -384,7 +394,7 @@
         <div class="flex gap-2 mt-2">
           <button
             onclick="saveEditBill()"
-            class="flex-1 bg-green-500 text-white py-2 rounded-xl font-bold text-sm"
+            class="flex-1 bg-[#008697] text-white py-2 rounded-xl font-bold text-sm"
           >
             Save
           </button>
@@ -406,8 +416,8 @@
       <div class="bg-white w-full max-w-sm rounded-2xl p-5">
         <h2 class="font-bold text-lg mb-2 text-red-600">Delete Order</h2>
         <p class="text-sm text-gray-500 mb-4">
-          This order will be marked as deleted. It stays in history for
-          record, but won't count toward totals or reports.
+          This order will be marked as deleted. It stays in history for record,
+          but won't count toward totals or reports.
         </p>
 
         <label class="text-xs text-gray-500 mb-1 block"
@@ -428,7 +438,7 @@
         <div class="flex gap-2 mt-2">
           <button
             onclick="confirmDeleteBill()"
-            class="flex-1 bg-red-600 text-white py-2 rounded-xl font-bold text-sm"
+            class="flex-1 bg-[#008697] text-white py-2 rounded-xl font-bold text-sm"
           >
             Delete
           </button>
@@ -452,12 +462,15 @@
           ⚠ Old Records Expiring Soon
         </h2>
         <p id="data-warning-text" class="text-sm text-gray-600 mb-4">
-          Some sales records will be permanently deleted within 7 days
-          (3-month auto-cleanup).
+          Some sales records will be permanently deleted within 7 days (3-month
+          auto-cleanup).
         </p>
         <div class="flex gap-2 mt-2">
           <button
-            onclick="closeDataWarning(); openSalesReport();"
+            onclick="
+              closeDataWarning();
+              openSalesReport();
+            "
             class="flex-1 bg-[#008697] text-white py-2 rounded-xl font-bold text-sm"
           >
             Export Now
@@ -498,25 +511,51 @@
             </button>
             <button
               onclick="exportSalesReport()"
-              class="bg-black text-white px-3 py-1.5 rounded-lg text-sm font-bold"
+              class="bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm font-bold"
             >
               Export Excel
             </button>
             <button
               onclick="exportSalesReportPDF()"
-              class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-bold"
+              class="bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm font-bold"
             >
               Export PDF
             </button>
             <button
               onclick="closeSalesReport()"
-              class="bg-gray-800 text-white px-3 py-1.5 rounded-lg text-sm"
+              class="bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm"
             >
               Close
             </button>
           </div>
         </div>
         <div class="flex-1 overflow-y-auto p-4">
+          <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+            <h3 class="font-bold text-gray-700">Best Selling Items</h3>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs text-gray-400">Top</span>
+              <input
+                type="number"
+                id="bestsellers-count"
+                value="10"
+                min="1"
+                max="100"
+                class="border rounded-lg px-2 py-1.5 text-sm w-16"
+              />
+              <button
+                onclick="renderBestSellers()"
+                class="bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm font-bold"
+              >
+                Filter
+              </button>
+              <button
+                onclick="resetBestSellersRange()"
+                class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-bold"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
           <div id="best-sellers-body" class="mb-8"></div>
           <hr class="border-gray-200 mb-6" />
           <div id="report-body"></div>
@@ -593,7 +632,7 @@
             </button>
             <button
               onclick="closeInventoryManager()"
-              class="bg-black text-white px-3 py-1.5 rounded-lg text-sm"
+              class="bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm"
             >
               Close
             </button>
@@ -707,7 +746,7 @@
           <div class="flex gap-2 mt-4">
             <button
               onclick="saveItem()"
-              class="flex-1 bg-green-500 text-white py-2 rounded-xl font-bold text-sm"
+              class="flex-1 bg-[#008697] text-white py-2 rounded-xl font-bold text-sm"
             >
               Save
             </button>
