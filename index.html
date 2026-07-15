@@ -242,9 +242,6 @@
               <!-- Row 1: Order Type + Discount -->
               <div class="flex gap-2">
                 <div class="flex-1">
-                  <label class="text-xs text-gray-400 font-black"
-                    >Order Type</label
-                  >
                   <select
                     id="orderType"
                     onchange="setOrderType(this.value)"
@@ -255,9 +252,6 @@
                   </select>
                 </div>
                 <div class="flex-1">
-                  <label class="text-xs text-gray-400 font-black"
-                    >Discount</label
-                  >
                   <select
                     id="discount"
                     onchange="renderCart()"
@@ -280,7 +274,7 @@
                   class="w-4 h-4 accent-[#008697]"
                 />
                 <span class="text-xs text-gray-400 font-black"
-                  >Apply Discount To Drinks</span
+                  >Discount To Drinks</span
                 >
               </label>
 
@@ -289,7 +283,7 @@
                 <input
                   id="orderNote"
                   type="text"
-                  placeholder="Add a note for this order..."
+                  placeholder="Any Notes Here..."
                   class="w-full p-2 border rounded-lg mt-1 text-sm"
                 />
               </div>
@@ -303,9 +297,9 @@
               </div>
             </div>
             <select id="paymentMethod" class="w-full p-2 border rounded-lg">
-              <option value="cash">Cash</option>
               <option value="card">Credit Card</option>
               <option value="qr">QR Pay</option>
+              <option value="cash">Cash</option>
             </select>
             <button
               id="processSaleBtn"
@@ -523,7 +517,7 @@
             </button>
             <button
               onclick="closeSalesReport()"
-              class="bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm"
+              class="bg-[#008697] font-bold text-white px-3 py-1.5 rounded-lg text-sm"
             >
               Close
             </button>
@@ -632,7 +626,7 @@
             </button>
             <button
               onclick="closeInventoryManager()"
-              class="bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm"
+              class="font-bold bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm"
             >
               Close
             </button>
