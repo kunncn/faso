@@ -63,12 +63,6 @@
           Inventory
         </button>
         <button
-          onclick="openHistoricalSaleModal()"
-          class="bg-white text-[#008697] px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-sm md:text-base"
-        >
-          Add Past Sale
-        </button>
-        <button
           onclick="resetDB()"
           class="bg-[#00434c] text-white px-2 py-1 rounded text-xs opacity-20"
         >
@@ -485,109 +479,6 @@
       </div>
     </div>
 
-    <!-- HISTORICAL SALE ENTRY MODAL -->
-    <div
-      id="historical-sale-modal"
-      class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 md:p-4"
-    >
-      <div
-        class="bg-white w-full max-w-lg rounded-2xl overflow-hidden flex flex-col max-h-[95vh]"
-      >
-        <div class="flex justify-between items-center p-4 border-b bg-gray-50">
-          <h2 class="font-bold text-lg">Add Past Sale (from receipt)</h2>
-          <button
-            onclick="closeHistoricalSaleModal()"
-            class="bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm"
-          >
-            Close
-          </button>
-        </div>
-
-        <div class="flex-1 overflow-y-auto p-4 space-y-3">
-          <div>
-            <label class="text-xs text-gray-500 mb-1 block">Sale Date *</label>
-            <input
-              type="date"
-              id="hist-date"
-              class="w-full border rounded-xl px-3 py-2 text-sm"
-            />
-          </div>
-
-          <div class="flex gap-2 items-end">
-            <div class="flex-1">
-              <label class="text-xs text-gray-500 mb-1 block">Item</label>
-              <select
-                id="hist-item-select"
-                class="w-full border rounded-xl px-3 py-2 text-sm"
-              ></select>
-            </div>
-            <div class="w-20">
-              <label class="text-xs text-gray-500 mb-1 block">Qty</label>
-              <input
-                type="number"
-                id="hist-item-qty"
-                value="1"
-                min="1"
-                class="w-full border rounded-xl px-3 py-2 text-sm"
-              />
-            </div>
-            <button
-              onclick="addHistoricalItem()"
-              class="bg-[#008697] text-white px-3 py-2 rounded-xl text-sm font-bold"
-            >
-              Add
-            </button>
-          </div>
-
-          <div id="hist-cart-list" class="space-y-2"></div>
-
-          <div class="flex justify-between items-center pt-2 border-t">
-            <span class="font-bold text-gray-500">Total</span>
-            <span id="hist-total" class="text-xl font-bold text-[#008697]"
-              >RM0.00</span
-            >
-          </div>
-
-          <div>
-            <label class="text-xs text-gray-500 mb-1 block"
-              >Payment Method</label
-            >
-            <select
-              id="hist-payment"
-              class="w-full border rounded-xl px-3 py-2 text-sm"
-            >
-              <option value="cash">Cash</option>
-              <option value="card">Credit Card</option>
-              <option value="qr">QR Pay</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="text-xs text-gray-500 mb-1 block"
-              >Staff PIN (who is entering this)</label
-            >
-            <input
-              id="hist-staff-pin"
-              type="password"
-              maxlength="4"
-              inputmode="numeric"
-              placeholder="Enter your PIN"
-              class="w-full border rounded-xl px-3 py-2 text-sm"
-            />
-          </div>
-
-          <p id="hist-error" class="hidden text-red-500 text-xs"></p>
-
-          <button
-            onclick="saveHistoricalSale()"
-            class="w-full bg-[#008697] text-white py-3 rounded-xl font-bold"
-          >
-            Save Past Sale
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- SALES REPORT MODAL -->
     <div
       id="report-modal"
@@ -626,7 +517,7 @@
             </button>
             <button
               onclick="closeSalesReport()"
-              class="bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm"
+              class="bg-[#008697] font-bold text-white px-3 py-1.5 rounded-lg text-sm"
             >
               Close
             </button>
@@ -735,7 +626,7 @@
             </button>
             <button
               onclick="closeInventoryManager()"
-              class="bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm"
+              class="font-bold bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm"
             >
               Close
             </button>

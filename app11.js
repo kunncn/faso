@@ -237,19 +237,10 @@ function renderBillPopup(sale) {
     `
     : "";
 
-  const manualBanner = sale.manualEntry
-    ? `
-      <div class="bg-[#e6f2f3] border border-[#99cdd3] text-[#00707f] text-sm md:text-base rounded-xl px-4 py-2 mb-3">
-        🖊 Manually added by ${sale.addedBy} (from paper receipt)
-      </div>
-    `
-    : "";
-
   body.innerHTML = `
     <div class="w-full max-w-3xl">
       ${deletedBanner}
       ${noteBanner}
-      ${manualBanner}
       <div class="flex justify-between items-baseline border-b border-gray-300 pb-3 mb-1">
         <h2 class="text-xl md:text-2xl font-semibold text-gray-800">Order Receipt</h2>
         <span class="text-sm text-gray-400">${formatTo12Hour(sale.date)}</span>
@@ -662,7 +653,6 @@ function openSalesReport() {
   generateSalesReport();
   renderBestSellers();
 }
-
 function resetBestSellersRange() {
   document.getElementById("bestsellers-count").value = "10";
   renderBestSellers();
@@ -1673,10 +1663,6 @@ function showOrderHistory(dateKey) {
           ? `<div class="text-[11px] text-gray-400 mt-1">✎ Edited by <strong>${sale.editedBy}</strong> · ${sale.editedAt}</div>`
           : "";
 
-        const manualBadge = sale.manualEntry
-          ? `<div class="text-[11px] text-[#00707f] mt-1">🖊 Manually added by <strong>${sale.addedBy}</strong> (from receipt)</div>`
-          : "";
-
         const noteBadge = sale.note
           ? `<div class="text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg px-2 py-1 mt-1">📝 ${sale.note}</div>`
           : "";
@@ -1720,7 +1706,7 @@ function showOrderHistory(dateKey) {
 
             <!-- Edit bill row -->
             <div class="px-3 pb-3 flex items-center justify-between gap-2 flex-wrap">
-              ${editedBadge || manualBadge || "<span></span>"}
+              ${editedBadge || "<span></span>"}
               <div class="flex gap-2">
                 <button onclick="openBillFullScreen(${sale.id})"
                   title="Full Screen"
@@ -1972,152 +1958,6 @@ function confirmDeleteBill() {
       showOrderHistory(sale.dateKey);
     });
   });
-}
-
-// =====================
-// ADD PAST SALE (manual backfill from paper receipts)
-// =====================
-let histCart = [];
-
-function openHistoricalSaleModal() {
-  histCart = [];
-  document.getElementById("hist-date").value = "";
-  document.getElementById("hist-item-qty").value = "1";
-  document.getElementById("hist-payment").value = "cash";
-  document.getElementById("hist-staff-pin").value = "";
-  document.getElementById("hist-error").classList.add("hidden");
-
-  const select = document.getElementById("hist-item-select");
-  select.innerHTML = inventory
-    .map((item) => `<option value="${item.id}">${item.name}</option>`)
-    .join("");
-
-  renderHistoricalCart();
-  document.getElementById("historical-sale-modal").classList.remove("hidden");
-}
-
-function closeHistoricalSaleModal() {
-  document.getElementById("historical-sale-modal").classList.add("hidden");
-}
-
-function addHistoricalItem() {
-  const itemId = parseInt(
-    document.getElementById("hist-item-select").value,
-    10,
-  );
-  const qty = parseInt(document.getElementById("hist-item-qty").value, 10) || 1;
-  const item = inventory.find((i) => i.id === itemId);
-  if (!item) return;
-
-  const price = item.price > 0 ? item.price : item.priceIce;
-
-  const existing = histCart.find((c) => c.id === item.id);
-  if (existing) {
-    existing.qty += qty;
-  } else {
-    histCart.push({
-      id: item.id,
-      name: item.name,
-      price,
-      category: item.category,
-      qty,
-    });
-  }
-
-  document.getElementById("hist-item-qty").value = "1";
-  renderHistoricalCart();
-}
-
-function removeHistoricalItem(idx) {
-  histCart.splice(idx, 1);
-  renderHistoricalCart();
-}
-
-function renderHistoricalCart() {
-  const list = document.getElementById("hist-cart-list");
-
-  list.innerHTML = histCart
-    .map(
-      (item, idx) => `
-      <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg text-sm">
-        <span>${item.name} x${item.qty}</span>
-        <div class="flex items-center gap-2">
-          <span class="font-semibold">RM${(item.price * item.qty).toFixed(2)}</span>
-          <button onclick="removeHistoricalItem(${idx})" class="text-gray-400">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-    `,
-    )
-    .join("");
-
-  const total = histCart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  document.getElementById("hist-total").innerText = `RM${total.toFixed(2)}`;
-  lucide.createIcons();
-}
-
-function saveHistoricalSale() {
-  const errorEl = document.getElementById("hist-error");
-  errorEl.classList.add("hidden");
-
-  const dateVal = document.getElementById("hist-date").value;
-  if (!dateVal) {
-    errorEl.innerText = "Please pick the sale date.";
-    errorEl.classList.remove("hidden");
-    return;
-  }
-
-  if (histCart.length === 0) {
-    errorEl.innerText = "Add at least one item.";
-    errorEl.classList.remove("hidden");
-    return;
-  }
-
-  const pin = document.getElementById("hist-staff-pin").value.trim();
-  const staffName = STAFF_PINS[pin];
-  if (!staffName) {
-    errorEl.innerText = "Wrong PIN. Try again.";
-    errorEl.classList.remove("hidden");
-    return;
-  }
-
-  const payment = document.getElementById("hist-payment").value;
-  const total = histCart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const saleDateObj = new Date(dateVal + "T12:00:00");
-
-  const sale = {
-    id: Date.now(),
-    dateKey: dateVal,
-    items: histCart.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      qty: item.qty,
-      orderType: "dinein",
-      category: item.category,
-      temp: null,
-      addons: [],
-      addonTotal: 0,
-      lineTotal: item.price * item.qty,
-    })),
-    payment,
-    orderType: "dinein",
-    subtotal: total,
-    discountRate: 0,
-    discountAmt: 0,
-    total,
-    date: saleDateObj.toLocaleString(),
-    note: "",
-    manualEntry: true,
-    addedBy: staffName,
-    editedBy: null,
-    editedAt: null,
-  };
-
-  saveSale(sale);
-  closeHistoricalSaleModal();
-  renderOrderHistory();
 }
 
 // =====================
