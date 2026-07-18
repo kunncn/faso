@@ -643,5 +643,19 @@
     "price": 7.0,
     "soldOut": false,
     "category": "coffee"
+  },
+  {
+    "id": 141,
+    "name": "Chocolate Sourdough Cookies",
+    "price": 18.0,
+    "soldOut": false,
+    "category": "pastry"
+  },
+  {
+    "id": 142,
+    "name": "Almond Caramel Sourdough Croissant",
+    "price": 18.0,
+    "soldOut": false,
+    "category": "pastry"
   }
 ]

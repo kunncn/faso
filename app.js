@@ -665,21 +665,28 @@ function openSalesReport() {
 
 function resetBestSellersRange() {
   document.getElementById("bestsellers-count").value = "10";
+  document.getElementById("bestsellers-range").value = "month";
   renderBestSellers();
 }
 
 // =====================
-// BEST SELLERS (all sales currently kept — up to 3 months)
+// BEST SELLERS (default: this month; option for last 3 months)
 // =====================
 function renderBestSellers() {
   const topN =
     parseInt(document.getElementById("bestsellers-count")?.value, 10) || 10;
+  const range = document.getElementById("bestsellers-range")?.value || "month";
+
+  // "This Month" = current calendar month only ("YYYY-MM" prefix match)
+  const thisMonthPrefix = getTodayKey().slice(0, 7);
 
   getAllSales((allSales) => {
     const itemStats = {}; // item name -> { category, qty, revenue }
 
     allSales.forEach((sale) => {
       if (sale.deleted) return;
+      if (range === "month" && !sale.dateKey.startsWith(thisMonthPrefix))
+        return;
       sale.items.forEach((item) => {
         if (!itemStats[item.name]) {
           itemStats[item.name] = {
@@ -1333,10 +1340,22 @@ function processSale() {
   }, 0);
   const finalTotal = sub - discountAmt;
 
+  // if backdate mode is on, save under the chosen past date instead of today
+  const saleDateKey = backdateActive ? backdateDateKey : getTodayKey();
+  let saleDateStr;
+  if (backdateActive) {
+    const now = new Date();
+    const d = new Date(backdateDateKey + "T00:00:00");
+    d.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+    saleDateStr = d.toLocaleString();
+  } else {
+    saleDateStr = new Date().toLocaleString();
+  }
+
   // Full detail saved to IndexedDB
   const sale = {
     id: Date.now(),
-    dateKey: getTodayKey(),
+    dateKey: saleDateKey,
     items: structuredClone(cart).map((item) => ({
       id: item.id,
       name: item.name,
@@ -1360,8 +1379,10 @@ function processSale() {
     discountRate,
     discountAmt,
     total: finalTotal,
-    date: new Date().toLocaleString(),
+    date: saleDateStr,
     note: document.getElementById("orderNote")?.value.trim() || "",
+    manualEntry: backdateActive,
+    addedBy: backdateActive ? backdateStaffName : null,
     editedBy: null,
     editedAt: null,
   };
@@ -1975,24 +1996,17 @@ function confirmDeleteBill() {
 }
 
 // =====================
-// ADD PAST SALE (manual backfill from paper receipts)
+// ADD PAST SALE (backdate mode — use the normal POS screen, just save
+// completed orders under a chosen past date instead of today)
 // =====================
-let histCart = [];
+let backdateActive = false;
+let backdateDateKey = null;
+let backdateStaffName = null;
 
 function openHistoricalSaleModal() {
-  histCart = [];
-  document.getElementById("hist-date").value = "";
-  document.getElementById("hist-item-qty").value = "1";
-  document.getElementById("hist-payment").value = "cash";
+  document.getElementById("hist-date").value = backdateDateKey || "";
   document.getElementById("hist-staff-pin").value = "";
   document.getElementById("hist-error").classList.add("hidden");
-
-  const select = document.getElementById("hist-item-select");
-  select.innerHTML = inventory
-    .map((item) => `<option value="${item.id}">${item.name}</option>`)
-    .join("");
-
-  renderHistoricalCart();
   document.getElementById("historical-sale-modal").classList.remove("hidden");
 }
 
@@ -2000,124 +2014,40 @@ function closeHistoricalSaleModal() {
   document.getElementById("historical-sale-modal").classList.add("hidden");
 }
 
-function addHistoricalItem() {
-  const itemId = parseInt(
-    document.getElementById("hist-item-select").value,
-    10,
-  );
-  const qty = parseInt(document.getElementById("hist-item-qty").value, 10) || 1;
-  const item = inventory.find((i) => i.id === itemId);
-  if (!item) return;
-
-  const price = item.price > 0 ? item.price : item.priceIce;
-
-  const existing = histCart.find((c) => c.id === item.id);
-  if (existing) {
-    existing.qty += qty;
-  } else {
-    histCart.push({
-      id: item.id,
-      name: item.name,
-      price,
-      category: item.category,
-      qty,
-    });
-  }
-
-  document.getElementById("hist-item-qty").value = "1";
-  renderHistoricalCart();
-}
-
-function removeHistoricalItem(idx) {
-  histCart.splice(idx, 1);
-  renderHistoricalCart();
-}
-
-function renderHistoricalCart() {
-  const list = document.getElementById("hist-cart-list");
-
-  list.innerHTML = histCart
-    .map(
-      (item, idx) => `
-      <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg text-sm">
-        <span>${item.name} x${item.qty}</span>
-        <div class="flex items-center gap-2">
-          <span class="font-semibold">RM${(item.price * item.qty).toFixed(2)}</span>
-          <button onclick="removeHistoricalItem(${idx})" class="text-gray-400">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-    `,
-    )
-    .join("");
-
-  const total = histCart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  document.getElementById("hist-total").innerText = `RM${total.toFixed(2)}`;
-  lucide.createIcons();
-}
-
-function saveHistoricalSale() {
+function startHistoricalMode() {
   const errorEl = document.getElementById("hist-error");
-  errorEl.classList.add("hidden");
-
   const dateVal = document.getElementById("hist-date").value;
+  const pin = document.getElementById("hist-staff-pin").value.trim();
+  const staffName = STAFF_PINS[pin];
+
   if (!dateVal) {
     errorEl.innerText = "Please pick the sale date.";
     errorEl.classList.remove("hidden");
     return;
   }
-
-  if (histCart.length === 0) {
-    errorEl.innerText = "Add at least one item.";
-    errorEl.classList.remove("hidden");
-    return;
-  }
-
-  const pin = document.getElementById("hist-staff-pin").value.trim();
-  const staffName = STAFF_PINS[pin];
   if (!staffName) {
     errorEl.innerText = "Wrong PIN. Try again.";
     errorEl.classList.remove("hidden");
     return;
   }
 
-  const payment = document.getElementById("hist-payment").value;
-  const total = histCart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const saleDateObj = new Date(dateVal + "T12:00:00");
+  backdateActive = true;
+  backdateDateKey = dateVal;
+  backdateStaffName = staffName;
 
-  const sale = {
-    id: Date.now(),
-    dateKey: dateVal,
-    items: histCart.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      qty: item.qty,
-      orderType: "dinein",
-      category: item.category,
-      temp: null,
-      addons: [],
-      addonTotal: 0,
-      lineTotal: item.price * item.qty,
-    })),
-    payment,
-    orderType: "dinein",
-    subtotal: total,
-    discountRate: 0,
-    discountAmt: 0,
-    total,
-    date: saleDateObj.toLocaleString(),
-    note: "",
-    manualEntry: true,
-    addedBy: staffName,
-    editedBy: null,
-    editedAt: null,
-  };
-
-  saveSale(sale);
   closeHistoricalSaleModal();
-  renderOrderHistory();
+
+  const banner = document.getElementById("backdate-banner");
+  banner.classList.remove("hidden");
+  document.getElementById("backdate-banner-text").innerText =
+    `Backdate Mode: adding orders for ${dateVal}`;
+}
+
+function turnOffBackdateMode() {
+  backdateActive = false;
+  backdateDateKey = null;
+  backdateStaffName = null;
+  document.getElementById("backdate-banner").classList.add("hidden");
 }
 
 // =====================

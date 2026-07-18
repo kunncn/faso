@@ -215,6 +215,26 @@
             </button>
           </div>
           <div
+            id="backdate-banner"
+            class="hidden bg-[#e6f2f3] border-b border-[#99cdd3] text-[#00707f] text-xs px-3 py-2 flex justify-between items-center"
+          >
+            <span id="backdate-banner-text">Backdate Mode</span>
+            <div class="flex gap-3">
+              <button
+                onclick="openHistoricalSaleModal()"
+                class="underline font-bold"
+              >
+                Change Date
+              </button>
+              <button
+                onclick="turnOffBackdateMode()"
+                class="underline font-bold"
+              >
+                Turn Off
+              </button>
+            </div>
+          </div>
+          <div
             class="p-3 border-b bg-gray-50 flex items-center justify-between"
           >
             <div class="flex items-center gap-2 min-w-0">
@@ -485,104 +505,51 @@
       </div>
     </div>
 
-    <!-- HISTORICAL SALE ENTRY MODAL -->
+    <!-- HISTORICAL MODE — SET DATE MODAL -->
     <div
       id="historical-sale-modal"
-      class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 md:p-4"
+      class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
     >
-      <div
-        class="bg-white w-full max-w-lg rounded-2xl overflow-hidden flex flex-col max-h-[95vh]"
-      >
-        <div class="flex justify-between items-center p-4 border-b bg-gray-50">
-          <h2 class="font-bold text-lg">Add Past Sale (from receipt)</h2>
+      <div class="bg-white w-full max-w-sm rounded-2xl p-5">
+        <h2 class="font-bold text-lg mb-2">Add Past Sale</h2>
+        <p class="text-sm text-gray-500 mb-4">
+          Pick the date, then order normally on the main screen like usual.
+          Every sale you complete will be saved under this date instead of
+          today.
+        </p>
+
+        <label class="text-xs text-gray-500 mb-1 block">Sale Date *</label>
+        <input
+          type="date"
+          id="hist-date"
+          class="w-full border rounded-xl px-3 py-2 text-sm mb-3"
+        />
+
+        <label class="text-xs text-gray-500 mb-1 block"
+          >Staff PIN (who is entering these sales)</label
+        >
+        <input
+          id="hist-staff-pin"
+          type="password"
+          maxlength="4"
+          inputmode="numeric"
+          placeholder="Enter your PIN"
+          class="w-full border rounded-xl px-3 py-2 text-sm mb-2"
+        />
+        <p id="hist-error" class="hidden text-red-500 text-xs mb-2"></p>
+
+        <div class="flex gap-2 mt-2">
+          <button
+            onclick="startHistoricalMode()"
+            class="flex-1 bg-[#008697] text-white py-2 rounded-xl font-bold text-sm"
+          >
+            Start
+          </button>
           <button
             onclick="closeHistoricalSaleModal()"
-            class="bg-[#008697] text-white px-3 py-1.5 rounded-lg text-sm"
+            class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold text-sm"
           >
-            Close
-          </button>
-        </div>
-
-        <div class="flex-1 overflow-y-auto p-4 space-y-3">
-          <div>
-            <label class="text-xs text-gray-500 mb-1 block">Sale Date *</label>
-            <input
-              type="date"
-              id="hist-date"
-              class="w-full border rounded-xl px-3 py-2 text-sm"
-            />
-          </div>
-
-          <div class="flex gap-2 items-end">
-            <div class="flex-1">
-              <label class="text-xs text-gray-500 mb-1 block">Item</label>
-              <select
-                id="hist-item-select"
-                class="w-full border rounded-xl px-3 py-2 text-sm"
-              ></select>
-            </div>
-            <div class="w-20">
-              <label class="text-xs text-gray-500 mb-1 block">Qty</label>
-              <input
-                type="number"
-                id="hist-item-qty"
-                value="1"
-                min="1"
-                class="w-full border rounded-xl px-3 py-2 text-sm"
-              />
-            </div>
-            <button
-              onclick="addHistoricalItem()"
-              class="bg-[#008697] text-white px-3 py-2 rounded-xl text-sm font-bold"
-            >
-              Add
-            </button>
-          </div>
-
-          <div id="hist-cart-list" class="space-y-2"></div>
-
-          <div class="flex justify-between items-center pt-2 border-t">
-            <span class="font-bold text-gray-500">Total</span>
-            <span id="hist-total" class="text-xl font-bold text-[#008697]"
-              >RM0.00</span
-            >
-          </div>
-
-          <div>
-            <label class="text-xs text-gray-500 mb-1 block"
-              >Payment Method</label
-            >
-            <select
-              id="hist-payment"
-              class="w-full border rounded-xl px-3 py-2 text-sm"
-            >
-              <option value="cash">Cash</option>
-              <option value="card">Credit Card</option>
-              <option value="qr">QR Pay</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="text-xs text-gray-500 mb-1 block"
-              >Staff PIN (who is entering this)</label
-            >
-            <input
-              id="hist-staff-pin"
-              type="password"
-              maxlength="4"
-              inputmode="numeric"
-              placeholder="Enter your PIN"
-              class="w-full border rounded-xl px-3 py-2 text-sm"
-            />
-          </div>
-
-          <p id="hist-error" class="hidden text-red-500 text-xs"></p>
-
-          <button
-            onclick="saveHistoricalSale()"
-            class="w-full bg-[#008697] text-white py-3 rounded-xl font-bold"
-          >
-            Save Past Sale
+            Cancel
           </button>
         </div>
       </div>
@@ -636,6 +603,13 @@
           <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
             <h3 class="font-bold text-gray-700">Best Selling Items</h3>
             <div class="flex items-center gap-2 flex-wrap">
+              <select
+                id="bestsellers-range"
+                class="border rounded-lg px-2 py-1.5 text-sm"
+              >
+                <option value="month">This Month</option>
+                <option value="3months">Last 3 Months</option>
+              </select>
               <span class="text-xs text-gray-400">Top</span>
               <input
                 type="number"
