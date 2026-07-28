@@ -641,6 +641,8 @@ let currentBestSellersByQty = [];
 let currentBestSellersByRevenue = [];
 let reportChartWeek = null;
 let reportChartDay = null;
+let trafficChartWeek = null;
+let trafficChartDay = null;
 const REPORT_DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const REPORT_COLORS = [
   "#008697",
@@ -788,6 +790,8 @@ function generateSalesReport() {
     const numWeeks = Math.floor((daysInMonth - 1 + firstDayMonWeekday) / 7) + 1;
     // matrix[dayIdx 0=Mon..6=Sun][weekIdx 0-based] = total sales
     const matrix = REPORT_DAY_NAMES.map(() => Array(numWeeks).fill(0));
+    // same shape as matrix, but counts ORDERS (customer traffic) instead of RM
+    const trafficMatrix = REPORT_DAY_NAMES.map(() => Array(numWeeks).fill(0));
 
     allSales.forEach((sale) => {
       if (sale.deleted) return;
@@ -798,16 +802,17 @@ function generateSalesReport() {
       const jsDay = d.getDay(); // 0=Sun..6=Sat
       const dayIdx = jsDay === 0 ? 6 : jsDay - 1; // convert to Mon=0..Sun=6
       matrix[dayIdx][weekIdx] += sale.total;
+      trafficMatrix[dayIdx][weekIdx] += 1; // count this order as 1 customer visit
     });
 
-    currentReportData = { year, month, numWeeks, matrix };
+    currentReportData = { year, month, numWeeks, matrix, trafficMatrix };
     renderSalesReport();
   });
 }
 
 function renderSalesReport() {
   if (!currentReportData) return;
-  const { year, month, numWeeks, matrix } = currentReportData;
+  const { year, month, numWeeks, matrix, trafficMatrix } = currentReportData;
 
   let totalSales = 0;
   let daysWithSales = 0;
@@ -820,6 +825,19 @@ function renderSalesReport() {
     }),
   );
   const avgPerDay = daysWithSales > 0 ? totalSales / daysWithSales : 0;
+
+  // customer traffic totals (order count)
+  let totalOrders = 0;
+  let daysWithOrders = 0;
+  trafficMatrix.forEach((row) =>
+    row.forEach((v) => {
+      if (v > 0) {
+        totalOrders += v;
+        daysWithOrders++;
+      }
+    }),
+  );
+  const avgOrdersPerDay = daysWithOrders > 0 ? totalOrders / daysWithOrders : 0;
 
   // highlight the best-selling day in each week column
   const maxPerWeek = [];
@@ -867,16 +885,28 @@ function renderSalesReport() {
     <div class="flex gap-3 justify-end text-sm mb-6 flex-wrap">
       <div class="bg-[#e6f2f3] px-4 py-2 rounded-lg"><strong>Total Sales:</strong> RM${totalSales.toFixed(2)}</div>
       <div class="bg-[#e6f2f3] px-4 py-2 rounded-lg"><strong>Average per day:</strong> RM${avgPerDay.toFixed(2)}</div>
+      <div class="bg-[#e6f2f3] px-4 py-2 rounded-lg"><strong>Total Orders:</strong> ${totalOrders}</div>
+      <div class="bg-[#e6f2f3] px-4 py-2 rounded-lg"><strong>Avg Orders/Day:</strong> ${avgOrdersPerDay.toFixed(1)}</div>
     </div>
     <div class="border rounded-xl p-3 mb-6">
       <canvas id="chart-by-week" height="220"></canvas>
     </div>
-    <div class="border rounded-xl p-3">
+    <div class="border rounded-xl p-3 mb-8">
       <canvas id="chart-by-day" height="220"></canvas>
+    </div>
+
+    <hr class="border-gray-200 mb-6" />
+    <h3 class="font-bold text-gray-700 mb-3">Customer Traffic - ${monthLabel}</h3>
+    <div class="border rounded-xl p-3 mb-6">
+      <canvas id="chart-traffic-week" height="220"></canvas>
+    </div>
+    <div class="border rounded-xl p-3">
+      <canvas id="chart-traffic-day" height="220"></canvas>
     </div>
   `;
 
   drawReportCharts();
+  drawTrafficCharts();
 }
 
 function drawReportCharts() {
@@ -919,9 +949,58 @@ function drawReportCharts() {
   });
 }
 
+// =====================
+// CUSTOMER TRAFFIC CHARTS (order count — how many customers ordered)
+// =====================
+function drawTrafficCharts() {
+  const { numWeeks, trafficMatrix } = currentReportData;
+  const weekLabels = Array.from(
+    { length: numWeeks },
+    (_, i) => `Week ${i + 1}`,
+  );
+
+  const byWeekDatasets = REPORT_DAY_NAMES.map((day, i) => ({
+    label: day,
+    data: trafficMatrix[i],
+    backgroundColor: REPORT_COLORS[i % REPORT_COLORS.length],
+  }));
+
+  if (trafficChartWeek) trafficChartWeek.destroy();
+  trafficChartWeek = new Chart(document.getElementById("chart-traffic-week"), {
+    type: "bar",
+    data: { labels: weekLabels, datasets: byWeekDatasets },
+    options: {
+      responsive: true,
+      plugins: {
+        title: { display: true, text: "Customer Traffic — by Week (Orders)" },
+      },
+      scales: { y: { ticks: { stepSize: 1 } } },
+    },
+  });
+
+  const byDayDatasets = weekLabels.map((wk, wIdx) => ({
+    label: wk,
+    data: REPORT_DAY_NAMES.map((_, dIdx) => trafficMatrix[dIdx][wIdx]),
+    backgroundColor: REPORT_COLORS[wIdx % REPORT_COLORS.length],
+  }));
+
+  if (trafficChartDay) trafficChartDay.destroy();
+  trafficChartDay = new Chart(document.getElementById("chart-traffic-day"), {
+    type: "bar",
+    data: { labels: REPORT_DAY_NAMES, datasets: byDayDatasets },
+    options: {
+      responsive: true,
+      plugins: {
+        title: { display: true, text: "Customer Traffic — by Day (Orders)" },
+      },
+      scales: { y: { ticks: { stepSize: 1 } } },
+    },
+  });
+}
+
 function exportSalesReport() {
   if (!currentReportData) return;
-  const { year, month, numWeeks, matrix } = currentReportData;
+  const { year, month, numWeeks, matrix, trafficMatrix } = currentReportData;
 
   let totalSales = 0;
   let daysWithSales = 0;
@@ -960,6 +1039,41 @@ function exportSalesReport() {
   ];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+
+  // second sheet: customer traffic (order count) — same layout as sales
+  let totalOrders = 0;
+  let daysWithOrders = 0;
+  trafficMatrix.forEach((row) =>
+    row.forEach((v) => {
+      if (v > 0) {
+        totalOrders += v;
+        daysWithOrders++;
+      }
+    }),
+  );
+  const avgOrdersPerDay = daysWithOrders > 0 ? totalOrders / daysWithOrders : 0;
+
+  const trafficRows = [
+    ["Day", ...weekHeaders, "", "Total Orders", "Average per day"],
+  ];
+  REPORT_DAY_NAMES.forEach((day, i) => {
+    const rowVals = trafficMatrix[i].map((v) => (v > 0 ? v : ""));
+    const extra =
+      i === 0
+        ? ["", totalOrders, Number(avgOrdersPerDay.toFixed(1))]
+        : ["", "", ""];
+    trafficRows.push([day, ...rowVals, ...extra]);
+  });
+  const wsTraffic = XLSX.utils.aoa_to_sheet(trafficRows);
+  wsTraffic["!cols"] = [
+    { wch: 8 },
+    ...weekHeaders.map(() => ({ wch: 10 })),
+    { wch: 2 },
+    { wch: 14 },
+    { wch: 16 },
+  ];
+  XLSX.utils.book_append_sheet(wb, wsTraffic, "Customer Traffic");
+
   XLSX.writeFile(
     wb,
     `faso-sales-report-${year}-${String(month).padStart(2, "0")}.xlsx`,
@@ -1085,6 +1199,17 @@ function exportSalesReportPDF() {
 
   addChartImage("chart-by-week", "Comparison by Week");
   addChartImage("chart-by-day", "Comparison by Day");
+
+  // ---- Customer Traffic charts ----
+  doc.addPage();
+  y = margin;
+  doc.setFontSize(16);
+  doc.setTextColor(0, 134, 151);
+  doc.text("Customer Traffic", margin, y);
+  y += 8;
+
+  addChartImage("chart-traffic-week", "Customer Traffic — by Week (Orders)");
+  addChartImage("chart-traffic-day", "Customer Traffic — by Day (Orders)");
 
   // ---- Best Selling Items ----
   doc.addPage();

@@ -237,10 +237,19 @@ function renderBillPopup(sale) {
     `
     : "";
 
+  const manualBanner = sale.manualEntry
+    ? `
+      <div class="bg-[#e6f2f3] border border-[#99cdd3] text-[#00707f] text-sm md:text-base rounded-xl px-4 py-2 mb-3">
+        🖊 Manually added by ${sale.addedBy} (from paper receipt)
+      </div>
+    `
+    : "";
+
   body.innerHTML = `
     <div class="w-full max-w-3xl">
       ${deletedBanner}
       ${noteBanner}
+      ${manualBanner}
       <div class="flex justify-between items-baseline border-b border-gray-300 pb-3 mb-1">
         <h2 class="text-xl md:text-2xl font-semibold text-gray-800">Order Receipt</h2>
         <span class="text-sm text-gray-400">${formatTo12Hour(sale.date)}</span>
@@ -653,23 +662,31 @@ function openSalesReport() {
   generateSalesReport();
   renderBestSellers();
 }
+
 function resetBestSellersRange() {
   document.getElementById("bestsellers-count").value = "10";
+  document.getElementById("bestsellers-range").value = "month";
   renderBestSellers();
 }
 
 // =====================
-// BEST SELLERS (all sales currently kept — up to 3 months)
+// BEST SELLERS (default: this month; option for last 3 months)
 // =====================
 function renderBestSellers() {
   const topN =
     parseInt(document.getElementById("bestsellers-count")?.value, 10) || 10;
+  const range = document.getElementById("bestsellers-range")?.value || "month";
+
+  // "This Month" = current calendar month only ("YYYY-MM" prefix match)
+  const thisMonthPrefix = getTodayKey().slice(0, 7);
 
   getAllSales((allSales) => {
     const itemStats = {}; // item name -> { category, qty, revenue }
 
     allSales.forEach((sale) => {
       if (sale.deleted) return;
+      if (range === "month" && !sale.dateKey.startsWith(thisMonthPrefix))
+        return;
       sale.items.forEach((item) => {
         if (!itemStats[item.name]) {
           itemStats[item.name] = {
@@ -1323,10 +1340,22 @@ function processSale() {
   }, 0);
   const finalTotal = sub - discountAmt;
 
+  // if backdate mode is on, save under the chosen past date instead of today
+  const saleDateKey = backdateActive ? backdateDateKey : getTodayKey();
+  let saleDateStr;
+  if (backdateActive) {
+    const now = new Date();
+    const d = new Date(backdateDateKey + "T00:00:00");
+    d.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+    saleDateStr = d.toLocaleString();
+  } else {
+    saleDateStr = new Date().toLocaleString();
+  }
+
   // Full detail saved to IndexedDB
   const sale = {
     id: Date.now(),
-    dateKey: getTodayKey(),
+    dateKey: saleDateKey,
     items: structuredClone(cart).map((item) => ({
       id: item.id,
       name: item.name,
@@ -1350,8 +1379,10 @@ function processSale() {
     discountRate,
     discountAmt,
     total: finalTotal,
-    date: new Date().toLocaleString(),
+    date: saleDateStr,
     note: document.getElementById("orderNote")?.value.trim() || "",
+    manualEntry: backdateActive,
+    addedBy: backdateActive ? backdateStaffName : null,
     editedBy: null,
     editedAt: null,
   };
@@ -1663,6 +1694,10 @@ function showOrderHistory(dateKey) {
           ? `<div class="text-[11px] text-gray-400 mt-1">✎ Edited by <strong>${sale.editedBy}</strong> · ${sale.editedAt}</div>`
           : "";
 
+        const manualBadge = sale.manualEntry
+          ? `<div class="text-[11px] text-[#00707f] mt-1">🖊 Manually added by <strong>${sale.addedBy}</strong> (from receipt)</div>`
+          : "";
+
         const noteBadge = sale.note
           ? `<div class="text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg px-2 py-1 mt-1">📝 ${sale.note}</div>`
           : "";
@@ -1706,7 +1741,7 @@ function showOrderHistory(dateKey) {
 
             <!-- Edit bill row -->
             <div class="px-3 pb-3 flex items-center justify-between gap-2 flex-wrap">
-              ${editedBadge || "<span></span>"}
+              ${editedBadge || manualBadge || "<span></span>"}
               <div class="flex gap-2">
                 <button onclick="openBillFullScreen(${sale.id})"
                   title="Full Screen"
@@ -1958,6 +1993,61 @@ function confirmDeleteBill() {
       showOrderHistory(sale.dateKey);
     });
   });
+}
+
+// =====================
+// ADD PAST SALE (backdate mode — use the normal POS screen, just save
+// completed orders under a chosen past date instead of today)
+// =====================
+let backdateActive = false;
+let backdateDateKey = null;
+let backdateStaffName = null;
+
+function openHistoricalSaleModal() {
+  document.getElementById("hist-date").value = backdateDateKey || "";
+  document.getElementById("hist-staff-pin").value = "";
+  document.getElementById("hist-error").classList.add("hidden");
+  document.getElementById("historical-sale-modal").classList.remove("hidden");
+}
+
+function closeHistoricalSaleModal() {
+  document.getElementById("historical-sale-modal").classList.add("hidden");
+}
+
+function startHistoricalMode() {
+  const errorEl = document.getElementById("hist-error");
+  const dateVal = document.getElementById("hist-date").value;
+  const pin = document.getElementById("hist-staff-pin").value.trim();
+  const staffName = STAFF_PINS[pin];
+
+  if (!dateVal) {
+    errorEl.innerText = "Please pick the sale date.";
+    errorEl.classList.remove("hidden");
+    return;
+  }
+  if (!staffName) {
+    errorEl.innerText = "Wrong PIN. Try again.";
+    errorEl.classList.remove("hidden");
+    return;
+  }
+
+  backdateActive = true;
+  backdateDateKey = dateVal;
+  backdateStaffName = staffName;
+
+  closeHistoricalSaleModal();
+
+  const banner = document.getElementById("backdate-banner");
+  banner.classList.remove("hidden");
+  document.getElementById("backdate-banner-text").innerText =
+    `Backdate Mode: adding orders for ${dateVal}`;
+}
+
+function turnOffBackdateMode() {
+  backdateActive = false;
+  backdateDateKey = null;
+  backdateStaffName = null;
+  document.getElementById("backdate-banner").classList.add("hidden");
 }
 
 // =====================
