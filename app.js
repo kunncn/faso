@@ -273,6 +273,18 @@ function renderBillPopup(sale) {
           <span class="text-3xl md:text-4xl font-bold text-gray-900">RM${sale.total.toFixed(2)}</span>
         </div>
         <div class="text-sm text-gray-400 mt-2 text-right uppercase">${sale.payment}</div>
+        ${
+          sale.payment === "cash" && sale.cashReceived != null
+            ? `
+          <div class="flex justify-between text-sm text-gray-500 mt-1">
+            <span>Cash Received</span><span>RM${sale.cashReceived.toFixed(2)}</span>
+          </div>
+          <div class="flex justify-between text-sm font-semibold text-[#00707f]">
+            <span>Change Given</span><span>RM${sale.changeGiven.toFixed(2)}</span>
+          </div>
+        `
+            : ""
+        }
       </div>
     </div>
   `;
@@ -464,63 +476,14 @@ function openDB() {
     db = e.target.result;
     loadInventory();
     renderOrderHistory();
-    cleanupOldSales();
-    checkUpcomingDeletions();
-  };
-}
-
-// keep only the last 3 months of sales; older records are removed
-function cleanupOldSales() {
-  const cutoff = new Date();
-  cutoff.setMonth(cutoff.getMonth() - 3);
-  const cutoffKey = toDateKey(cutoff);
-
-  const tx = db.transaction("sales", "readwrite");
-  const store = tx.objectStore("sales");
-  const req = store.getAll();
-  req.onsuccess = function () {
-    req.result.forEach((sale) => {
-      if (sale.dateKey < cutoffKey) store.delete(sale.id);
-    });
+    // no auto-cleanup — sales data now persists indefinitely (kept as long
+    // as the device's storage allows)
   };
 }
 
 // small helper: Date object -> "YYYY-MM-DD" string matching sale.dateKey format
 function toDateKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-// warns 1 week before the 3-month auto-cleanup would delete a record,
-// so staff have a chance to export it first
-function checkUpcomingDeletions() {
-  const cutoff = new Date();
-  cutoff.setMonth(cutoff.getMonth() - 3);
-  const cutoffKey = toDateKey(cutoff);
-
-  const warnBoundary = new Date(cutoff);
-  warnBoundary.setDate(warnBoundary.getDate() + 7);
-  const warnBoundaryKey = toDateKey(warnBoundary);
-
-  getAllSales((allSales) => {
-    const upcoming = allSales.filter(
-      (s) =>
-        !s.deleted && s.dateKey > cutoffKey && s.dateKey <= warnBoundaryKey,
-    );
-    if (upcoming.length === 0) return;
-
-    const dates = upcoming.map((s) => s.dateKey).sort();
-    const earliest = dates[0];
-    const latest = dates[dates.length - 1];
-
-    document.getElementById("data-warning-text").innerText =
-      `${upcoming.length} order(s) from ${earliest}${earliest !== latest ? " to " + latest : ""} will be permanently deleted within 7 days (3-month auto-cleanup). Export your Sales Report now if you need this data.`;
-
-    document.getElementById("data-warning-modal").classList.remove("hidden");
-  });
-}
-
-function closeDataWarning() {
-  document.getElementById("data-warning-modal").classList.add("hidden");
 }
 
 openDB();
@@ -1429,6 +1392,42 @@ function removeFromCart(index) {
 }
 
 // =====================
+// CASH PAYMENT — show cash-received field only for Cash, live change calc
+// =====================
+function togglePaymentFields() {
+  const method = document.getElementById("paymentMethod").value;
+  const row = document.getElementById("cash-payment-row");
+  if (method === "cash") {
+    row.classList.remove("hidden");
+    updateChangeDisplay();
+  } else {
+    row.classList.add("hidden");
+  }
+}
+
+function updateChangeDisplay() {
+  const totalText = document
+    .getElementById("total")
+    .innerText.replace("RM", "");
+  const total = parseFloat(totalText) || 0;
+  const received =
+    parseFloat(document.getElementById("cashReceived").value) || 0;
+  const change = received - total;
+
+  const el = document.getElementById("changeAmount");
+  if (received === 0) {
+    el.innerText = "RM0.00";
+    el.className = "font-bold text-[#008697]";
+  } else if (change < 0) {
+    el.innerText = `Short RM${Math.abs(change).toFixed(2)}`;
+    el.className = "font-bold text-red-600";
+  } else {
+    el.innerText = `RM${change.toFixed(2)}`;
+    el.className = "font-bold text-[#008697]";
+  }
+}
+
+// =====================
 // PROCESS SALE
 // =====================
 function processSale() {
@@ -1465,6 +1464,19 @@ function processSale() {
   }, 0);
   const finalTotal = sub - discountAmt;
 
+  // if paying cash, make sure enough cash was entered and compute change
+  let cashReceived = null;
+  let changeGiven = null;
+  if (paymentMethod === "cash") {
+    cashReceived =
+      parseFloat(document.getElementById("cashReceived").value) || 0;
+    if (cashReceived < finalTotal) {
+      alert("Cash received is less than the total. Please check the amount.");
+      return;
+    }
+    changeGiven = cashReceived - finalTotal;
+  }
+
   // if backdate mode is on, save under the chosen past date instead of today
   const saleDateKey = backdateActive ? backdateDateKey : getTodayKey();
   let saleDateStr;
@@ -1499,6 +1511,8 @@ function processSale() {
         item.qty,
     })),
     payment: paymentMethod,
+    cashReceived,
+    changeGiven,
     orderType,
     subtotal: sub,
     discountRate,
@@ -1518,6 +1532,16 @@ function processSale() {
   // show thank-you on customer big-screen popup (if open)
   showThankYouPopup(finalTotal);
 
+  // show change due (if cash) on the success modal
+  const modalChangeRow = document.getElementById("modal-change-row");
+  if (paymentMethod === "cash") {
+    modalChangeRow.classList.remove("hidden");
+    document.getElementById("modal-change-amount").innerText =
+      `RM${changeGiven.toFixed(2)}`;
+  } else {
+    modalChangeRow.classList.add("hidden");
+  }
+
   cart = [];
   renderCart();
   // Reset form to default values
@@ -1529,6 +1553,8 @@ function processSale() {
   document.getElementById("discountDrinks").checked = false;
 
   document.getElementById("paymentMethod").value = "cash";
+  document.getElementById("cashReceived").value = "";
+  togglePaymentFields();
 
   document.getElementById("orderNote").value = "";
 
@@ -1941,6 +1967,8 @@ function editBillInCart(saleId) {
     document.getElementById("discount").value = sale.discountRate || "0";
     document.getElementById("discountDrinks").checked = false;
     document.getElementById("paymentMethod").value = sale.payment;
+    document.getElementById("cashReceived").value = sale.cashReceived || "";
+    togglePaymentFields();
     document.getElementById("orderType").value = sale.orderType;
     document.getElementById("orderNote").value = sale.note || "";
     selectedOrderType = sale.orderType;
@@ -1976,6 +2004,8 @@ function resetOrderForm() {
   document.getElementById("discount").value = "0";
   document.getElementById("discountDrinks").checked = false;
   document.getElementById("paymentMethod").value = "cash";
+  document.getElementById("cashReceived").value = "";
+  togglePaymentFields();
   document.getElementById("orderNote").value = "";
 }
 
@@ -2039,6 +2069,21 @@ function saveEditBill() {
 
   const finalTotal = sub - discountAmt;
 
+  // if paying cash, make sure enough cash was entered and compute change
+  let cashReceived = null;
+  let changeGiven = null;
+  if (paymentMethod === "cash") {
+    cashReceived =
+      parseFloat(document.getElementById("cashReceived").value) || 0;
+    if (cashReceived < finalTotal) {
+      errorEl.innerText =
+        "Cash received is less than the total. Please check the amount.";
+      errorEl.classList.remove("hidden");
+      return;
+    }
+    changeGiven = cashReceived - finalTotal;
+  }
+
   getSaleById(editingSaleId, (sale) => {
     if (!sale) return;
 
@@ -2060,6 +2105,8 @@ function saveEditBill() {
         item.qty,
     }));
     sale.payment = paymentMethod;
+    sale.cashReceived = cashReceived;
+    sale.changeGiven = changeGiven;
     sale.orderType = orderType;
     sale.subtotal = sub;
     sale.discountRate = discountRate;

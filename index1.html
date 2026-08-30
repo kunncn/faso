@@ -322,37 +322,11 @@
                 >
               </div>
             </div>
-            <select
-              id="paymentMethod"
-              onchange="togglePaymentFields()"
-              class="w-full p-2 border rounded-lg"
-            >
+            <select id="paymentMethod" class="w-full p-2 border rounded-lg">
               <option value="card">Credit Card</option>
               <option value="qr">QR Pay</option>
               <option value="cash">Cash</option>
             </select>
-
-            <div id="cash-payment-row" class="hidden space-y-1">
-              <label class="text-xs text-gray-400 font-black"
-                >Cash Received</label
-              >
-              <input
-                type="number"
-                id="cashReceived"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                oninput="updateChangeDisplay()"
-                class="w-full p-2 border rounded-lg"
-              />
-              <div class="flex justify-between items-center text-sm px-1 pt-1">
-                <span class="text-gray-500">Change to give back</span>
-                <span id="changeAmount" class="font-bold text-[#008697]"
-                  >RM0.00</span
-                >
-              </div>
-            </div>
-
             <button
               id="processSaleBtn"
               onclick="processSale()"
@@ -373,18 +347,6 @@
       <div class="bg-white p-6 rounded-2xl text-center w-full max-w-sm">
         <h2 class="text-xl font-bold">Sale Successful!</h2>
         <p class="text-gray-500 mt-2">Receipt generated</p>
-        <div
-          id="modal-change-row"
-          class="hidden mt-4 bg-[#e6f2f3] rounded-xl p-3"
-        >
-          <div class="text-sm text-gray-500">Change to give back</div>
-          <div
-            id="modal-change-amount"
-            class="text-2xl font-bold text-[#008697]"
-          >
-            RM0.00
-          </div>
-        </div>
         <button
           onclick="closeModal()"
           class="mt-5 bg-[#008697] text-white px-6 py-2 rounded-lg"
@@ -505,6 +467,39 @@
             class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold text-sm"
           >
             Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATA DELETION WARNING MODAL -->
+    <div
+      id="data-warning-modal"
+      class="hidden fixed inset-0 bg-black/50 z-[70] flex items-center justify-center p-4"
+    >
+      <div class="bg-white w-full max-w-sm rounded-2xl p-5">
+        <h2 class="font-bold text-lg mb-2 text-yellow-600">
+          ⚠ Old Records Expiring Soon
+        </h2>
+        <p id="data-warning-text" class="text-sm text-gray-600 mb-4">
+          Some sales records will be permanently deleted within 7 days (3-month
+          auto-cleanup).
+        </p>
+        <div class="flex gap-2 mt-2">
+          <button
+            onclick="
+              closeDataWarning();
+              openSalesReport();
+            "
+            class="flex-1 bg-[#008697] text-white py-2 rounded-xl font-bold text-sm"
+          >
+            Export Now
+          </button>
+          <button
+            onclick="closeDataWarning()"
+            class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold text-sm"
+          >
+            Dismiss
           </button>
         </div>
       </div>

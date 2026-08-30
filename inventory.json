@@ -657,5 +657,49 @@
     "price": 18.0,
     "soldOut": false,
     "category": "pastry"
+  },
+  {
+    "id": 143,
+    "name": "Multi Grain Loaf",
+    "price": 26.0,
+    "soldOut": false,
+    "category": "loaf"
+  },
+
+  {
+    "id": 144,
+    "name": "Madeleine",
+    "price": 4.5,
+    "soldOut": false,
+    "category": "pastry"
+  },
+  {
+    "id": 145,
+    "name": "Cranberry Madeleine",
+    "price": 5.0,
+    "soldOut": false,
+    "category": "pastry"
+  },
+  {
+    "id": 146,
+    "name": "Blueberry Madeleine",
+    "price": 5.0,
+    "soldOut": false,
+    "category": "pastry"
+  },
+  {
+    "id": 147,
+    "name": "Black Olives Loaf",
+    "price": 28.0,
+    "soldOut": false,
+    "category": "loaf"
+  },
+  {
+    "id": 148,
+    "name": "Hojicha Latte",
+    "price": 15.0,
+    "priceIce": 16.0,
+    "soldOut": false,
+    "category": "hojicha"
   }
 ]
