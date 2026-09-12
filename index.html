@@ -651,19 +651,42 @@
       class="hidden fixed inset-0 bg-white z-[9999] flex-col p-6 md:p-10"
     >
       <div
-        class="flex justify-between items-center border-b border-gray-200 pb-4 mb-4"
+        class="flex justify-between items-center border-b border-gray-200 pb-4 mb-4 gap-3"
       >
-        <h1
-          class="text-xl md:text-2xl font-semibold text-gray-800 tracking-tight"
-        >
-          FASO PASTRY
-        </h1>
-        <button
-          onclick="closeCustomerDisplay()"
-          class="border border-gray-300 text-gray-600 px-4 py-2 rounded-lg text-sm md:text-base"
-        >
-          Close
-        </button>
+        <div class="flex items-center gap-2 min-w-0">
+          <button
+            id="nav-prev-btn"
+            onclick="navigateBill(-1)"
+            class="nav-btn hidden border border-gray-300 text-gray-700 hover:bg-gray-100 w-9 h-9 md:w-10 md:h-10 rounded-lg flex items-center justify-center"
+            title="Previous Bill"
+          >
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+          </button>
+          <h1
+            class="text-xl md:text-2xl font-semibold text-gray-800 tracking-tight"
+          >
+            FASO PASTRY
+          </h1>
+        </div>
+
+        <div id="nav-counter" class="hidden text-sm md:text-base text-gray-400 font-medium"></div>
+
+        <div class="flex items-center gap-2">
+          <button
+            id="nav-next-btn"
+            onclick="navigateBill(1)"
+            class="nav-btn hidden border border-gray-300 text-gray-700 hover:bg-gray-100 w-9 h-9 md:w-10 md:h-10 rounded-lg flex items-center justify-center"
+            title="Next Bill"
+          >
+            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+          </button>
+          <button
+            onclick="closeCustomerDisplay()"
+            class="border border-gray-300 text-gray-600 px-4 py-2 rounded-lg text-sm md:text-base"
+          >
+            Close
+          </button>
+        </div>
       </div>
 
       <div

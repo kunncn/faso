@@ -34,6 +34,9 @@ const STAFF_PINS = {
 // CUSTOMER BIG-SCREEN POPUP
 // =====================
 let customerPopupMode = "live"; // "live" = current cart, "history" = a past bill
+let historyNavSaleIds = []; // ordered list of sale IDs for the currently viewed date
+let historyNavIndex = -1; // current position in historyNavSaleIds
+let historyNavDateKey = null; // which date's order list we're navigating
 
 function openCustomerDisplay() {
   customerPopupMode = "live";
@@ -48,6 +51,74 @@ function closeCustomerDisplay() {
   popup.classList.add("hidden");
   popup.classList.remove("flex");
   customerPopupMode = "live";
+  hideBillNav();
+}
+
+function hideBillNav() {
+  const prevBtn = document.getElementById("nav-prev-btn");
+  const nextBtn = document.getElementById("nav-next-btn");
+  const counter = document.getElementById("nav-counter");
+  if (prevBtn) prevBtn.classList.add("hidden");
+  if (nextBtn) nextBtn.classList.add("hidden");
+  if (counter) counter.classList.add("hidden");
+}
+
+function updateBillNavUI() {
+  const prevBtn = document.getElementById("nav-prev-btn");
+  const nextBtn = document.getElementById("nav-next-btn");
+  const counter = document.getElementById("nav-counter");
+  if (!prevBtn || !nextBtn || !counter) return;
+
+  const total = historyNavSaleIds.length;
+  const idx = historyNavIndex;
+
+  if (customerPopupMode !== "history" || total <= 0 || idx < 0) {
+    hideBillNav();
+    return;
+  }
+
+  // Show nav controls
+  prevBtn.classList.remove("hidden");
+  nextBtn.classList.remove("hidden");
+  counter.classList.remove("hidden");
+
+  // Counter: "Bill 3 of 12" (1-based)
+  counter.textContent = `Bill ${idx + 1} of ${total} · ${historyNavDateKey}`;
+
+  // Disabled state styling for first / last
+  if (idx <= 0) {
+    prevBtn.classList.add("opacity-30", "cursor-not-allowed");
+    prevBtn.setAttribute("disabled", "true");
+  } else {
+    prevBtn.classList.remove("opacity-30", "cursor-not-allowed");
+    prevBtn.removeAttribute("disabled");
+  }
+
+  if (idx >= total - 1) {
+    nextBtn.classList.add("opacity-30", "cursor-not-allowed");
+    nextBtn.setAttribute("disabled", "true");
+  } else {
+    nextBtn.classList.remove("opacity-30", "cursor-not-allowed");
+    nextBtn.removeAttribute("disabled");
+  }
+
+  lucide.createIcons();
+}
+
+function navigateBill(direction) {
+  if (customerPopupMode !== "history") return;
+  const total = historyNavSaleIds.length;
+  if (total === 0) return;
+
+  const newIdx = historyNavIndex + direction;
+  if (newIdx < 0 || newIdx >= total) return;
+
+  historyNavIndex = newIdx;
+  const nextSaleId = historyNavSaleIds[newIdx];
+  getSaleById(nextSaleId, (sale) => {
+    if (!sale) return;
+    renderBillPopup(sale);
+  });
 }
 
 function renderCustomerPopup() {
@@ -171,17 +242,39 @@ function renderCustomerPopup() {
       </div>
     </div>
   `;
+
+  hideBillNav();
 }
 
 // show a completed bill (from History) in the same full-screen popup
 function openBillFullScreen(saleId) {
   getSaleById(saleId, (sale) => {
     if (!sale) return;
-    customerPopupMode = "history";
-    renderBillPopup(sale);
-    const popup = document.getElementById("customer-popup");
-    popup.classList.remove("hidden");
-    popup.classList.add("flex");
+
+    // Determine the date context: prefer the date currently open in History,
+    // otherwise fall back to the sale's own dateKey.
+    let dateKey = null;
+    const historyDateEl = document.getElementById("history-date");
+    if (historyDateEl && historyDateEl.value) {
+      dateKey = historyDateEl.value;
+    } else {
+      dateKey = sale.dateKey;
+    }
+
+    // Fetch all sales for that date to build the ordered nav list.
+    getSalesByDate(dateKey, (salesForDate) => {
+      // Sort newest-first to match the History list display order.
+      const sorted = salesForDate.slice().sort((a, b) => b.id - a.id);
+      historyNavSaleIds = sorted.map((s) => s.id);
+      historyNavIndex = historyNavSaleIds.indexOf(saleId);
+      historyNavDateKey = dateKey;
+
+      customerPopupMode = "history";
+      renderBillPopup(sale);
+      const popup = document.getElementById("customer-popup");
+      popup.classList.remove("hidden");
+      popup.classList.add("flex");
+    });
   });
 }
 
@@ -288,6 +381,8 @@ function renderBillPopup(sale) {
       </div>
     </div>
   `;
+
+  updateBillNavUI();
 }
 
 function showThankYouPopup(total) {
@@ -485,6 +580,23 @@ function openDB() {
 function toDateKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
+
+document.addEventListener("keydown", (e) => {
+  const popup = document.getElementById("customer-popup");
+  if (!popup || popup.classList.contains("hidden")) return;
+  if (customerPopupMode !== "history") return;
+
+  if (e.key === "ArrowLeft") {
+    e.preventDefault();
+    navigateBill(-1);
+  } else if (e.key === "ArrowRight") {
+    e.preventDefault();
+    navigateBill(1);
+  } else if (e.key === "Escape") {
+    e.preventDefault();
+    closeCustomerDisplay();
+  }
+});
 
 openDB();
 
