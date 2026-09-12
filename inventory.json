@@ -701,5 +701,41 @@
     "priceIce": 16.0,
     "soldOut": false,
     "category": "hojicha"
+  },
+  {
+    "id": 149,
+    "name": "Babyccino",
+    "price": 5.0,
+    "priceIce": 6.0,
+    "soldOut": false,
+    "category": "coffee"
+  },
+  {
+    "id": 150,
+    "name": "Pistachio Kunafa Sourdough Croissant",
+    "price": 18.0,
+    "soldOut": false,
+    "category": "pastry"
+  },
+  {
+    "id": 151,
+    "name": "Strawberry Vanilla Sourdough Croissant",
+    "price": 18.0,
+    "soldOut": false,
+    "category": "pastry"
+  },
+  {
+    "id": 152,
+    "name": "Matcha Sourdough Croissant",
+    "price": 18.0,
+    "soldOut": false,
+    "category": "pastry"
+  },
+  {
+    "id": 153,
+    "name": "Jam Pack",
+    "price": 3.0,
+    "soldOut": false,
+    "category": "addon"
   }
 ]
