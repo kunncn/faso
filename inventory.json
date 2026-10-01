@@ -737,5 +737,26 @@
     "price": 3.0,
     "soldOut": false,
     "category": "addon"
+  },
+  {
+    "id": 154,
+    "name": "Bay Leaf Cheese Chicken Sourdough Baguette",
+    "price": 15.0,
+    "soldOut": false,
+    "category": "savory"
+  },
+  {
+    "id": 155,
+    "name": "Beef Broccoli Vege Sourdough Baguette",
+    "price": 15.0,
+    "soldOut": false,
+    "category": "savory"
+  },
+  {
+    "id": 156,
+    "name": "Cheesey Tuna Sourdough Baguette",
+    "price": 15.0,
+    "soldOut": false,
+    "category": "savory"
   }
 ]
